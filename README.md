@@ -32,7 +32,7 @@ See [`docs/CURRENT_AUTHORITY.md`](docs/CURRENT_AUTHORITY.md) for current geometr
 
 ### Seed Hawk 660
 
-Active test candidate: **3-Tank RS V2**.
+Active test candidate: **3-Tank RS V3**.
 
 Target architecture:
 
@@ -41,8 +41,25 @@ Target architecture:
 - Physical conveyor selection retained.
 - All three tanks support the same seed/fertilizer category logic.
 - Realistic Seeder crop-specific seed types are synchronized across all three tanks.
+- V3 removes the unsupported sprayer `loadInfoIndex` attribute and tightens the custom-seed matcher to fill-type names ending in `SEED`.
 
-A small V3 cleanup is still planned before finalization.
+## Development assets
+
+Project-owned compatibility code:
+
+- [`scripts/compatibility/Bourgault7950FourTankCompat.lua`](scripts/compatibility/Bourgault7950FourTankCompat.lua)
+- [`scripts/compatibility/SeedHawk660ThreeTankCompat.lua`](scripts/compatibility/SeedHawk660ThreeTankCompat.lua)
+
+Rebuild/patch authority:
+
+- [`equipment/bourgault_7950/PATCH_SPEC.md`](equipment/bourgault_7950/PATCH_SPEC.md)
+- [`equipment/seedhawk_660/PATCH_SPEC.md`](equipment/seedhawk_660/PATCH_SPEC.md)
+- [`patches/README.md`](patches/README.md)
+
+Static candidate validation:
+
+- [`tools/validate_candidate.py`](tools/validate_candidate.py)
+- [`builds/CANDIDATE_CHECKSUMS.md`](builds/CANDIDATE_CHECKSUMS.md)
 
 ## Repository policy
 
