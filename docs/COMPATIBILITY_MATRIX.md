@@ -6,18 +6,20 @@ This matrix tracks known compatibility status for the active FS25 Realistic Farm
 
 | Component | Base functionality | Realistic Seeder | Precision Farming | Save/reload | Multiplayer | Status |
 |---|---|---|---|---|---|---|
-| Seed Hawk 660 3-Tank RS V2 | PASS structurally | TESTING | No known conflict | TESTING | Not yet tested | TESTING |
+| Seed Hawk 660 3-Tank RS V3 | PASS structurally | TESTING | No known conflict | TESTING | Not yet tested | TESTING |
 | Bourgault 7950B V6 Engineering | PASS structurally | TESTING | No known conflict | TESTING | Not yet tested | TESTING |
 | Bourgault 71300 | Not started | Planned | Planned | Planned | Planned | ROADMAP |
-| Shared Realistic Seeder compatibility layer | Prototype works structurally | ACTIVE | N/A | TESTING | Not yet tested | ACTIVE |
+| Shared Realistic Seeder compatibility layer | Equipment-specific prototypes work structurally | ACTIVE | N/A | TESTING | Not yet tested | ACTIVE |
 | ProBox crop-specific packaging | Not started | Planned | N/A | Planned | Planned | ROADMAP |
 
 ## Seed Hawk 660 notes
 
 - Three donor compartments retained: 5,600 / 5,600 / 10,600 L.
-- All three tanks now use the same seed/fertilizer category architecture.
+- All three tanks use the same seed/fertilizer category architecture.
 - Realistic Seeder synchronization is intended to make Tanks 1 and 2 behave like Tank 3.
-- One cleanup remains: remove unsupported `loadInfoIndex` from the cart-level sprayer element.
+- V3 removes the unsupported cart-level sprayer `loadInfoIndex` attribute found during the V2 audit.
+- V3 tightens custom-seed fallback matching to fill-type names ending in `SEED`, excluding the generic `SEEDS` name.
+- Current V3 candidate passes 16/16 project static validation checks.
 
 ## Bourgault 7950B notes
 
@@ -26,6 +28,7 @@ This matrix tracks known compatibility status for the active FS25 Realistic Farm
 - Tanks 1-3 use separate physical fill-volume envelopes.
 - Tank 4 uses two physical fill-volume regions with an 82/18 capacity split.
 - Tank 1 conveyor reach remains the major mechanical item requiring runtime proof.
+- Current V6 candidate passes 18/18 project static validation checks.
 
 ## Realistic Seeder notes
 
@@ -36,9 +39,15 @@ Current project compatibility logic:
 3. Adds those fill types to every relevant compartment.
 4. Raises a fill-type state change so attached sowing/sprayer tools rebuild their source lists.
 
+Current matcher status:
+
+- Seed Hawk V3: suffix-based `SEED` heuristic.
+- Bourgault V6: broader `SEED` substring heuristic retained for candidate fidelity.
+
 Production hardening still required:
 
-- Replace broad `SEED` substring matching with a verified allowlist or stricter pattern.
+- Replace heuristic matching with a verified allowlist or proven Realistic Seeder product mapping where practical.
+- Consolidate duplicated equipment-specific bridge logic after both carts pass runtime tests.
 - Reduce recurring polling if a reliable registration lifecycle hook is identified.
 - Confirm dedicated-server/client synchronization.
 
