@@ -1,0 +1,42 @@
+# Third-party / packaged mods
+*.zip
+
+# Farming Simulator runtime/test artifacts
+log.txt
+log_*.txt
+savegame*/
+shader_cache/
+
+# Extracted donor/work directories
+work/
+build/
+dist/
+temp/
+tmp/
+donor/
+donors/
+original/
+originals/
+
+# GIANTS / I3D temporary or backup files
+*.i3d.bak
+*.i3d~
+*.bak
+*.tmp
+
+# Blender
+*.blend1
+*.blend2
+*.blend@
+__pycache__/
+*.pyc
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local test captures unless deliberately curated
+screenshots/
+captures/
