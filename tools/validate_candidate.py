@@ -2,7 +2,8 @@
 """Static validation helper for FS25 Realistic Farming candidate ZIPs.
 
 This does not replace in-game testing. It checks archive integrity, XML/I3D parsing,
-required project files, and a small set of project-authority invariants.
+required project files, and project-authority invariants that can be proven without
+running Farming Simulator.
 """
 
 from __future__ import annotations
@@ -52,7 +53,45 @@ def find_fill_units(root: ET.Element) -> list[ET.Element]:
     return root.findall("./fillUnit/fillUnitConfigurations/fillUnitConfiguration/fillUnits/fillUnit")
 
 
-def validate_bourgault(zf: zipfile.ZipFile) -> list[Check]:
+def find_named_i3d_node(root: ET.Element, name: str) -> ET.Element | None:
+    for node in root.iter():
+        if node.attrib.get("name") == name:
+            return node
+    return None
+
+
+def parse_vec3(value: str | None) -> tuple[float, float, float] | None:
+    if value is None:
+        return None
+    try:
+        parts = [float(v) for v in value.split()]
+    except ValueError:
+        return None
+    if len(parts) != 3:
+        return None
+    return parts[0], parts[1], parts[2]
+
+
+def validate_named_node_z(i3d_root: ET.Element, expected: dict[str, float], tolerance: float = 0.005) -> Check:
+    problems: list[str] = []
+    found: dict[str, float] = {}
+    for name, expected_z in expected.items():
+        node = find_named_i3d_node(i3d_root, name)
+        if node is None:
+            problems.append(f"{name}: missing")
+            continue
+        translation = parse_vec3(node.attrib.get("translation"))
+        if translation is None:
+            problems.append(f"{name}: no parseable translation")
+            continue
+        z = translation[2]
+        found[name] = z
+        if abs(z - expected_z) > tolerance:
+            problems.append(f"{name}: z={z:.6f}, expected {expected_z:.6f}")
+    return Check("load/unload node Z authority", not problems, "; ".join(problems) if problems else str(found))
+
+
+def validate_bourgault(zf: zipfile.ZipFile, *, v7: bool) -> list[Check]:
     checks: list[Check] = []
     vehicle_path = "xml/Series_7950B.xml"
     i3d_path = "i3d/Series_7950B.i3d"
@@ -111,19 +150,65 @@ def validate_bourgault(zf: zipfile.ZipFile) -> list[Check]:
         str(sprayer.attrib if sprayer is not None else None),
     ))
 
+    i3d_root = xml_from_zip(zf, i3d_path)
     i3d = text_from_zip(zf, i3d_path)
     required_names = [
         "fillVolumeTank1", "fillVolumeTank2", "fillVolumeTank3", "fillVolumeTank4", "fillVolumeTank4Flex",
         "loadInfoTank1", "loadInfoTank2", "loadInfoTank3", "loadInfoTank4",
         "unloadInfoTank1", "unloadInfoTank2", "unloadInfoTank3", "unloadInfoTank4",
         "exactFillRootNodeTank1", "exactFillRootNodeTank2", "exactFillRootNodeTank3", "exactFillRootNodeTank4",
+        "tankFlapsFront", "tankFlapsBack",
     ]
     missing = [name for name in required_names if f'name="{name}"' not in i3d]
     checks.append(Check("required I3D nodes present", not missing, f"missing {missing}"))
 
+    expected_z = {
+        "loadInfoTank1": 2.121,
+        "loadInfoTank2": 0.721,
+        "loadInfoTank3": -0.678,
+        "loadInfoTank4": -1.792,
+        "unloadInfoTank1": 2.121,
+        "unloadInfoTank2": 0.721,
+        "unloadInfoTank3": -0.678,
+        "unloadInfoTank4": -1.792,
+    }
+    checks.append(validate_named_node_z(i3d_root, expected_z))
+
     script = text_from_zip(zf, script_path)
     checks.append(Check("compat bridge raises FILLTYPE_CHANGE", "VehicleStateChange.FILLTYPE_CHANGE" in script))
     checks.append(Check("compat bridge targets four units", "for i = 1, 4 do" in script))
+
+    if v7:
+        broad_markers = [
+            'string.find(string.upper(tostring(name)), "SEED"',
+            'string.find(name, "SEED"',
+        ]
+        checks.append(Check(
+            "V7 rejects broad SEED substring matcher",
+            not any(marker in script for marker in broad_markers),
+        ))
+        checks.append(Check(
+            "V7 uses suffix seed fallback",
+            'string.sub(upperName, -4) == "SEED"' in script and 'upperName ~= "SEEDS"' in script,
+        ))
+        checks.append(Check(
+            "V7 does not union arbitrary existing tank products",
+            "addSet(desired, unit.supportedFillTypes)" not in script,
+        ))
+        checks.append(Check(
+            "V7 uses category authority",
+            'getFillTypesByCategoryNames("seeds fertilizer")' in script,
+        ))
+
+        # The validator can prove that both physical flap groups exist, but the exact animation
+        # keyframe semantics vary by donor I3D export. V7 therefore records flap-state review as
+        # a separate mandatory engineering gate rather than pretending node presence proves timing.
+        checks.append(Check(
+            "V7 physical flap groups present for mandatory timing audit",
+            'name="tankFlapsFront"' in i3d and 'name="tankFlapsBack"' in i3d,
+            "animation timing must still be reviewed against the 0.400 Tank 3 invariant",
+        ))
+
     return checks
 
 
@@ -195,13 +280,22 @@ def validate_seedhawk(zf: zipfile.ZipFile) -> list[Check]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("zipfile", help="candidate FS25 mod ZIP")
-    parser.add_argument("--profile", choices=["bourgault7950-v6", "seedhawk660-v3"], required=True)
+    parser.add_argument(
+        "--profile",
+        choices=["bourgault7950-v6", "bourgault7950-v7", "seedhawk660-v3"],
+        required=True,
+    )
     args = parser.parse_args()
 
     try:
         with zipfile.ZipFile(args.zipfile, "r") as zf:
             checks = validate_common(zf)
-            checks.extend(validate_bourgault(zf) if args.profile == "bourgault7950-v6" else validate_seedhawk(zf))
+            if args.profile == "bourgault7950-v6":
+                checks.extend(validate_bourgault(zf, v7=False))
+            elif args.profile == "bourgault7950-v7":
+                checks.extend(validate_bourgault(zf, v7=True))
+            else:
+                checks.extend(validate_seedhawk(zf))
     except Exception as exc:
         print(f"FATAL: {exc}", file=sys.stderr)
         return 2
