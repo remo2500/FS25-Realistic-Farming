@@ -112,6 +112,24 @@ Four receiving roots must exist and be mapped:
 
 All are normally parked vertically out of range and the `loadingPipe` animation activates only the selected root near the appropriate selector stop.
 
+## Manufacturer conveyor-motion authority
+
+Bourgault 7000-series operating documentation defines three separate conveyor positioning functions:
+
+- **Inner Arm Swing** — In / Out
+- **Outer Arm Swing** — In / Out
+- **Conveyor Height** — Up / Down
+
+The manufacturer procedure for changing tank openings is to raise the spout clear with Conveyor Height, use Inner and Outer Arm Swing to move over the desired opening, then lower the spout into the opening.
+
+This matters directly to V7: the 7950 conveyor should be treated as a **three-function positioning mechanism**, not a two-joint mechanism whose first two joints must supply all additional Tank 1 reach.
+
+The Bourgault Model 7950 product authority confirms that the 7950 was available with a load/unload conveyor using a 10-inch tube and 15-inch belt. Bourgault support also lists model-specific instruction `0252-41-01`, **Downspout Installation - 7950 A/C with a Conveyor**. The contents/dimensions of that EzParts document have not yet been recovered, so do not infer unpublished dimensions from its title.
+
+Detailed Tank 1 engineering authority is maintained in:
+
+`equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+
 ## Conveyor selector states
 
 `coverConfiguration` selector stops:
@@ -149,18 +167,45 @@ V7 must implement the two-group sequence below:
 
 Static acceptance invariant: at selector stop 0.400, `tankFlapsBack` must be fully open and `tankFlapsFront` must be fully closed.
 
-## Current discharge targets
+## Current discharge positions and V7 target
 
-These are target discharge positions, not necessarily opening centers:
+These are discharge positions, not necessarily opening centers:
 
-| Tank | Discharge Z | Opening containment | Status |
+| Tank | Current discharge Z | Opening containment | Status |
 |---|---:|---|---|
-| 1 | +1.650 m | inside A by only ~0.06 m at rear edge | HOLD: mechanical/trigger margin |
+| 1 | +1.650 m | inside A by only ~0.06 m at rear edge | HOLD: insufficient margin / primary-arm overtravel |
 | 2 | +0.493 m | inside B | donor-range pose |
 | 3 | -0.769 m | inside C | donor-range pose |
 | 4 | -1.792 m | centered on D | donor-range pose |
 
-Tank 1 still uses approximately 107.99 degrees / -65.60 degrees on the first two primary arms versus donor loading-envelope values near 100 / -50 degrees. V7 should not worsen this. Preferred future refinement is to obtain additional forward reach from downstream articulation if the donor hierarchy permits it, rather than increasing primary-arm overtravel.
+Tank 1 currently uses approximately 107.99 degrees / -65.60 degrees on the first two primary arms versus prior 7950 donor loading-envelope values near 100 / -50 degrees. V7 should reduce, not increase, that overtravel.
+
+### Tank 1 preferred solve
+
+Opening A center is **Z +2.121 m**. V7 should first attempt to place the discharge near this center while keeping the first two swing joints within the actual 7950 donor loading envelope and using the donor's Conveyor Height/downstream articulation for remaining positioning.
+
+Preferred engineering target:
+
+- Z **+2.121 m**
+- initial center tolerance **+/-0.15 m**
+
+Provisional minimum static acceptance band, using a project-defined 0.20 m edge margin until runtime trigger width is known:
+
+- Z **+1.790 to +2.452 m**
+
+This 0.20 m margin is a project engineering criterion, not a manufacturer dimension. Runtime trigger testing may justify changing it later.
+
+Do not move the Tank 1 opening, fill volume, or exact-fill root simply to accommodate a poorly positioned spout.
+
+Before writing new Tank 1 keyframes, recover the actual 7950 animation hierarchy and identify which nodes implement Inner Arm Swing, Outer Arm Swing, and Conveyor Height. Use:
+
+```bash
+python tools/extract_i3d_animation.py <candidate-or-donor.zip> \
+  --i3d-path i3d/Series_7950B.i3d \
+  --animation loadingPipe
+```
+
+Comparative Bourgault 71300 I3D evidence may be used only to guide hierarchy inspection. Its angles/translations are **not** valid 7950 limits.
 
 ## Cart-level sprayer representative
 
@@ -204,11 +249,14 @@ The V7 profile must reject:
 - discharge targets outside the audited physical opening spans;
 - Tank 3 rear-flap timing that leaves `tankFlapsBack` closed at 0.400.
 
+The validator must not claim that node presence alone proves the Tank 1 kinematics or flap state. Those remain animation/engineering review gates until the actual keyframes are inspected.
+
 ## Runtime promotion blockers
 
 Before V7 can be promoted:
 
 - Confirm Tank 1 linkage/hose behavior and fill-trigger reliability.
+- Confirm Tank 1 discharge has meaningful margin inside opening A.
 - Confirm the corrected Tank 3 rear flap is visibly open.
 - Confirm each selector stop fills only its intended tank.
 - Confirm all four tanks accept a known Realistic Seeder crop-specific seed.
