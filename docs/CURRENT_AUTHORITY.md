@@ -24,6 +24,7 @@ Status labels:
 - Seed and fertilizer should both be valid compartment categories where the real cart permits flexible product use.
 - Precision Farming remains the soil/agronomy authority. This project should complement it rather than duplicate soil simulation.
 - Third-party donor assets are not to be redistributed in this public repository unless licensing explicitly permits it.
+- Candidate ZIPs must be versioned; do not silently replace a previously distributed candidate with different contents under the same version label.
 
 ---
 
@@ -32,6 +33,18 @@ Status labels:
 ### Current candidate
 
 **V6 Engineering — TESTING**
+
+Candidate SHA-256:
+
+`6072d0f1e805a684bd926aa97fcbcca3d5b7ef5f9429d92c3697d59b26289651`
+
+Project-owned compatibility source:
+
+`scripts/compatibility/Bourgault7950FourTankCompat.lua`
+
+Patch authority:
+
+`equipment/bourgault_7950/PATCH_SPEC.md`
 
 ### LOCKED capacity model
 
@@ -97,6 +110,7 @@ This architecture is **TESTING** visually. Logical separation is approved, but e
 - All four tanks advertise the same `seeds fertilizer` categories.
 - Runtime compatibility logic synchronizes discovered crop-specific seed fill types across Tanks 1-4.
 - When new supported fill types are added, the attached sowing/sprayer source caches are forced to refresh via fill-type state change.
+- V6 still uses a broad `SEED` substring fallback. This remains a production-hardening item and should be versioned if changed.
 
 ### Fresh-purchase state
 
@@ -104,13 +118,35 @@ This architecture is **TESTING** visually. Logical separation is approved, but e
 
 The final selector state closes the `loadingPipe` animation to 1.0, preserving the original fully stowed transport endpoint on a fresh purchase.
 
+### Static validation
+
+Current V6 archive passes **18/18** checks in `tools/validate_candidate.py` using profile `bourgault7950-v6`.
+
 ---
 
 ## 3. Seed Hawk 660
 
 ### Current candidate
 
-**3-Tank RS V2 — TESTING**
+**3-Tank RS V3 — TESTING**
+
+V3 supersedes V2 before runtime promotion. V3 changes only cleanup/compatibility behavior relative to V2:
+
+- removes the unsupported cart-level sprayer `loadInfoIndex` attribute;
+- tightens custom-seed fallback matching from any name containing `SEED` to names ending in `SEED`, excluding the generic `SEEDS` name;
+- updates version/changelog text.
+
+Candidate SHA-256:
+
+`d052c302f3a54d0a77273dc02098185223094ca6e7971b5236eb114684edadcb`
+
+Project-owned compatibility source:
+
+`scripts/compatibility/SeedHawk660ThreeTankCompat.lua`
+
+Patch authority:
+
+`equipment/seedhawk_660/PATCH_SPEC.md`
 
 ### LOCKED compartment model
 
@@ -139,21 +175,29 @@ Retain the donor's three independent physical compartments:
 - All three tanks advertise the same `seeds fertilizer` categories.
 - Runtime compatibility logic synchronizes crop-specific seed types across Tanks 1-3.
 - Fill-source caches are refreshed after new supported seed types are discovered.
+- V3 uses an `ends in SEED` fallback rather than the broader V2 substring matcher.
 
-### Known cleanup item
+### Sprayer cleanup
 
-**ACTIVE**
+**RESOLVED in V3**
 
-Remove unsupported `loadInfoIndex` from the cart-level `<sprayer>` element. FS25 Sprayer supports `fillUnitIndex`, `unloadInfoIndex`, and `fillVolumeIndex`; the extra `loadInfoIndex` is not part of the specialization schema and should not remain in a final build.
+Cart-level sprayer authority is:
 
-### Seed-type matcher hardening
+```xml
+<sprayer fillUnitIndex="3" unloadInfoIndex="3">
+```
 
-**ACTIVE**
+The unsupported `loadInfoIndex` attribute from V2 is removed.
 
-The current compatibility fallback treats fill-type names containing `SEED` as candidate crop-specific seed products. This is acceptable for testing but too broad for production. Final logic should use either:
+### Remaining seed-matcher hardening
 
-- an explicit runtime allowlist based on actual Realistic Seeder registered products, or
-- a stricter naming pattern proven against the installed Realistic Seeder version.
+**ACTIVE / production improvement**
+
+The V3 suffix matcher is safer than V2 but is still heuristic. An explicit runtime allowlist based on the actual installed Realistic Seeder registered products remains preferable if reliable registration data can be captured.
+
+### Static validation
+
+Current V3 archive passes **16/16** checks in `tools/validate_candidate.py` using profile `seedhawk660-v3`.
 
 ---
 
@@ -170,25 +214,48 @@ Purpose:
 3. Synchronize those supported fill types across every compartment of the target air cart.
 4. Trigger a fill-type state refresh so attached sowing/sprayer tools rebuild their source lists.
 
+Current equipment scripts are intentionally separate while the two carts are still under runtime test.
+
 ### Known production improvements
 
+- Consolidate duplicated synchronization logic into a reusable shared module once both carts pass runtime tests.
+- Replace remaining heuristic seed-name detection with an explicit/proven Realistic Seeder product mapping where practical.
 - Replace periodic 750 ms scanning with event-driven or one-time post-registration initialization if a reliable lifecycle hook is identified.
-- Replace broad `SEED` substring detection with a proven allowlist/pattern.
 - Ensure multiplayer/server-client state remains deterministic after runtime supported-fill-type changes.
 
 ---
 
-## 5. Superseded Bourgault builds
+## 5. Superseded builds
+
+### Bourgault
 
 - V3 — superseded: incorrect selector positions and startup state behavior.
 - V4 — superseded: improved state handling and Realistic Seeder concept, but still used guessed conveyor targets and transformed combined fill meshes.
 - V5 — superseded: geometry-derived targets were better, but primary conveyor joints were driven beyond believable donor limits and front fill-volume segmentation was still inadequate.
 
-Do not return to these approaches unless specifically investigating regression history.
+### Seed Hawk
+
+- RS V2 — superseded by V3 cleanup before promotion. Mechanical and three-tank architecture remain the same.
+
+Do not return to superseded approaches unless specifically investigating regression history.
 
 ---
 
-## 6. Promotion criteria
+## 6. Repository development authority
+
+Project-owned development assets now live in the repository:
+
+- Compatibility scripts: `scripts/compatibility/`
+- Equipment patch specifications: `equipment/`
+- Donor-safe rebuild policy: `patches/README.md`
+- Candidate checksum authority: `builds/CANDIDATE_CHECKSUMS.md`
+- Static candidate validator: `tools/validate_candidate.py`
+
+Candidate ZIPs and extracted third-party donor trees are intentionally excluded.
+
+---
+
+## 7. Promotion criteria
 
 A cart may be promoted from TESTING to LOCKED/approved only after:
 
