@@ -11,21 +11,21 @@ Use this protocol before promoting any air-cart build from TESTING to approved/L
 - Record the FS25 game version and dependency mod versions.
 - Keep `log.txt` after every failed or suspicious test.
 - Where possible, use clearly different products in adjacent tanks so visual bleed is obvious.
+- Do not use an old purchased development cart as proof of a changed fill-unit architecture.
 
 ## Seed Hawk 660 — required test
 
-1. Purchase a fresh Seed Hawk cart.
+1. Purchase a fresh Seed Hawk cart with the **Conveyor** configuration.
 2. Confirm normal initial conveyor/transport state.
-3. Test the same known Realistic Seeder crop-specific seed product in:
-   - Tank 1,
-   - Tank 2,
-   - Tank 3.
+3. Test the same known Realistic Seeder crop-specific seed product in Tanks 1, 2, and 3.
 4. Confirm each tank accepts fertilizer as well.
 5. Fill all three tanks with distinguishable products and inspect heap boundaries.
 6. Attach the intended Seed Hawk drill and confirm it can source/consume the correct product from each compartment.
 7. Save and reload with non-zero fill in all three tanks.
 8. Verify fill types and levels are preserved.
-9. Review `log.txt` for XML, Lua, fill-unit, specialization, or missing-node warnings/errors.
+9. Repeat a three-compartment filling smoke test with the **No Conveyor** store configuration.
+10. Smoke-test each major cart/drill attachment arrangement supplied by the pack so the three-tank architecture is not validated against only one combination.
+11. Review `log.txt` for XML, Lua, fill-unit, specialization, or missing-node warnings/errors.
 
 ### Seed Hawk pass criteria
 
@@ -33,37 +33,44 @@ Use this protocol before promoting any air-cart build from TESTING to approved/L
 - No tank silently converts crop-specific seed back to generic `SEEDS`.
 - Drill consumption works from all three tanks.
 - No product visually appears in the wrong compartment.
+- Conveyor and No Conveyor configurations retain valid filling behavior.
 - Save/reload is stable.
 
-## Bourgault 7950B — required test
+## Bourgault 7950B — V7 required test
 
-1. Purchase a fresh cart.
+Do **not** use V6 for the next promotion test. V6 has a confirmed Tank 3 physical-hatch timing defect.
+
+1. Purchase a fresh V7 cart.
 2. Confirm the conveyor is fully stowed at purchase.
 3. Cycle selector states Tank 1 -> Tank 2 -> Tank 3 -> Tank 4 -> closed.
 4. Capture overhead and side screenshots at each tank position.
 5. Verify discharge point is physically inside the intended opening.
-6. Inspect Tank 1 carefully for:
-   - impossible arm/linkage angles,
-   - stretched or intersecting hoses,
-   - collision with tank/lids,
-   - unreliable fill-trigger position.
-7. Test the same known Realistic Seeder crop-specific seed in Tanks 1-4.
-8. Confirm fertilizer is accepted in Tanks 1-4.
-9. Fill all four logical tanks with distinguishable products.
-10. Capture an overhead screenshot of the product heaps.
-11. Confirm Tank 1/2/3 heap separation and Tank 4 main/FLEX visual behavior.
-12. Attach the intended Bourgault drill and confirm consumption from every compartment.
-13. Save/reload with different products and non-zero fill levels in all four tanks.
-14. Verify selector/cover state and fill data survive reload.
-15. Review `log.txt`.
+6. Verify flap state at each selector:
+   - Tank 1: front flap group open.
+   - Tank 2: front flap group open.
+   - Tank 3: **rear flap group fully open and front group closed**.
+   - Tank 4: rear flap group open.
+   - Transport: both groups returned to the intended stowed/closed state.
+7. Inspect Tank 1 carefully for impossible arm/linkage angles, stretched/intersecting hoses, collision with tank/lids, and unreliable fill-trigger position.
+8. Test the same known Realistic Seeder crop-specific seed in Tanks 1-4.
+9. Confirm fertilizer is accepted in Tanks 1-4, including any expected dry fertilizer products supplied through the installed fertilizer category extensions.
+10. Fill all four logical tanks with distinguishable products.
+11. Capture an overhead screenshot of product heaps.
+12. Confirm Tank 1/2/3 heap separation and Tank 4 main/FLEX visual behavior.
+13. Attach the intended Bourgault drill and confirm consumption from every compartment.
+14. Save/reload with different products and non-zero fill levels in all four tanks.
+15. Verify selector/cover state and fill data survive reload.
+16. Review `log.txt`.
 
 ### Bourgault pass criteria
 
 - Fresh cart starts in transport/stowed state.
+- Correct physical flap group is open at every selector position.
+- Tank 3 no longer presents its fill point through a closed hatch.
 - All four selector positions are mechanically believable.
-- Tank 1 does not require visibly impossible articulation.
+- Tank 1 does not require visibly impossible articulation and has reliable trigger margin.
 - All four tanks accept crop-specific Realistic Seeder seed and fertilizer.
-- No cross-compartment heap bleed that materially misrepresents tank boundaries.
+- No cross-compartment heap bleed materially misrepresents tank boundaries.
 - Attached drill finds and consumes all supported products correctly.
 - Save/reload is stable.
 
@@ -74,19 +81,19 @@ Use at least one crop-specific seed fill type known to come from Realistic Seede
 Recommended comparison:
 
 1. Test generic `SEEDS` first.
-2. Test a crop-specific Realistic Seeder product such as the same product previously known to work in the rear/working compartment.
+2. Test a crop-specific Realistic Seeder product previously known to work in a donor/working compartment.
 3. Repeat with every compartment.
-4. If one compartment fails, capture:
-   - selected tank,
-   - product name,
-   - loading source/container,
-   - HUD display,
-   - screenshot of trigger alignment,
-   - `log.txt`.
+4. If one compartment fails, capture selected tank, product name, loading source/container, HUD display, trigger-alignment screenshot, and `log.txt`.
+
+## Custom fertilizer regression test
+
+Because category-based compatibility may be extended by other installed mods, record at least one expected custom dry fertilizer product if one is present in the current mod stack. Confirm that it is accepted consistently by every flexible air-cart compartment intended to carry fertilizer. Do not use liquid or otherwise physically unsuitable products as a pass/fail criterion for these dry cart tanks.
 
 ## Savegame migration warning
 
-Do not use an older purchased multi-tank development cart as proof of a new build's startup behavior. Changes to fill-unit count/index/capacity can make old savegame records misleading.
+Neither active cart should claim transparent migration from the original donor architecture until explicitly proven.
+
+Existing purchased donor carts should be emptied/sold before installing a changed multi-tank version unless migration has been tested. Changes to fill-unit count/index/capacity can cause saved fill-unit records to refer to different physical compartments.
 
 A fresh purchase is mandatory for first validation of every major architecture change.
 
@@ -96,8 +103,8 @@ Before calling a compatibility bridge release-ready:
 
 1. Host or dedicated server loads the same mod set.
 2. Client joins after mission load.
-3. Verify all tanks expose the same supported fill types on server and client.
-4. Fill different compartments from the client and server sides.
+3. Verify all tanks expose the same intended supported fill types on server and client.
+4. Fill different compartments from client and server sides.
 5. Verify fill level/type synchronization.
 6. Disconnect/rejoin and recheck state.
 7. Review both server and client logs.
@@ -110,6 +117,7 @@ Record:
 - Game version:
 - Dependency versions:
 - Cart:
+- Store configuration:
 - Tank number:
 - Product/fill type:
 - Expected result:
