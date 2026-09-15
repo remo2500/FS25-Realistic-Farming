@@ -10,14 +10,16 @@ The project currently focuses on:
 - Physical conveyor-selected filling of individual compartments.
 - Compatibility with crop-specific seed products from Realistic Seeder.
 - ProBox, pallet, and big-bag integration for realistic crop-specific seed handling.
-- Support for the crop set used by SW Manitoba 4x where realistic seed packaging makes sense.
+- Support for the intended map/crop set where realistic seed packaging makes sense.
 - Future fertilizer/input integration while keeping Precision Farming as the soil/agronomy authority.
 
 ## Current active work
 
 ### Bourgault 3320 / 7950B
 
-Active test candidate: **V6 Engineering**.
+**V6 Engineering is on HOLD. V7 is the active engineering target.**
+
+The deeper geometry audit found that V6 leaves the physical Tank 3 hatch closed at the Tank 3 selector position. V7 corrects the flap authority and hardens product compatibility before the next runtime test cycle.
 
 Target architecture:
 
@@ -26,7 +28,9 @@ Target architecture:
 - Physical conveyor position selects the compartment being filled.
 - Total modeled capacity remains 33,475 L.
 - Rear 410 bu + 90 bu FLEX region remains one logical Tank 4 for now.
-- Realistic Seeder crop-specific fill types are synchronized across all four compartments.
+- Tanks 1-2 use the front flap group; Tanks 3-4 use the rear flap group.
+- Realistic Seeder/custom seed compatibility uses category authority plus a narrowed crop-seed fallback rather than propagating arbitrary products from one tank to all tanks.
+- Tank 1 forward conveyor reach remains the primary runtime engineering risk.
 
 See [`docs/CURRENT_AUTHORITY.md`](docs/CURRENT_AUTHORITY.md) for current geometry, capacities, known risks, and locked decisions.
 
@@ -42,6 +46,7 @@ Target architecture:
 - All three tanks support the same seed/fertilizer category logic.
 - Realistic Seeder crop-specific seed types are synchronized across all three tanks.
 - V3 removes the unsupported sprayer `loadInfoIndex` attribute and tightens the custom-seed matcher to fill-type names ending in `SEED`.
+- V3 is intentionally being held unchanged until runtime evidence is available.
 
 ## Development assets
 
