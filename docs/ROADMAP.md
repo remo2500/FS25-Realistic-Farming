@@ -8,14 +8,32 @@ This roadmap defines the recommended order of work. Changes should be reflected 
 
 ### 1. Seed Hawk 660
 
-1. Remove unsupported `loadInfoIndex` from the cart-level sprayer element.
-2. Harden the Realistic Seeder fill-type matcher.
-3. Runtime-test crop-specific seed acceptance in Tanks 1, 2, and 3.
-4. Test drill consumption from each tank independently.
-5. Save/reload test with different products in all three compartments.
+Completed before runtime test:
+
+- Removed unsupported `loadInfoIndex` from the cart-level sprayer element in V3.
+- Hardened the Realistic Seeder fallback from broad substring matching to fill-type names ending in `SEED`.
+- Added project-owned compatibility source and static validator coverage.
+
+Next:
+
+1. Runtime-test crop-specific seed acceptance in Tanks 1, 2, and 3 using the same known product.
+2. Test drill consumption from each tank independently.
+3. Save/reload with different products in all three compartments.
+4. Test normal seed and fertilizer behavior for regression.
+5. Multiplayer test if required.
 6. Promote to approved baseline if no regressions are found.
 
 ### 2. Bourgault 7950B
+
+Completed before runtime test:
+
+- Four front-to-back logical tanks established at 9,691 / 1,938 / 4,228 / 17,618 L.
+- Verified physical opening map documented.
+- Four load/unload positions and exact-fill roots established.
+- Tank 4 represented as one logical unit across 410-bu main + 90-bu FLEX physical regions.
+- Project-owned Realistic Seeder bridge and static validator coverage added.
+
+Next:
 
 1. Runtime-test V6 fresh-purchase stow state.
 2. Verify conveyor positions for Tanks 1-4 from overhead and side views.
@@ -29,8 +47,8 @@ This roadmap defines the recommended order of work. Changes should be reflected 
 
 ## Phase 2 — Shared compatibility architecture
 
-1. Consolidate Seed Hawk and Bourgault compatibility logic into a reusable project-owned Realistic Seeder compatibility module where practical.
-2. Replace broad `SEED` substring matching with an explicit or proven Realistic Seeder product mapping.
+1. Consolidate Seed Hawk and Bourgault compatibility logic into a reusable project-owned Realistic Seeder compatibility module after both equipment candidates pass runtime tests.
+2. Replace heuristic `SEED` name matching with an explicit or proven Realistic Seeder product mapping.
 3. Identify a reliable post-mod-registration lifecycle event and reduce/remove recurring polling.
 4. Document all discovered crop-specific fill type names and associated crop/seed package data.
 5. Validate multiplayer synchronization behavior.
@@ -74,8 +92,18 @@ Tasks:
 
 ## Phase 6 — Documentation and release discipline
 
-1. Maintain a compatibility matrix for every supported mod version.
-2. Record test logs and known-good game/mod versions.
-3. Add patch/diff instructions so public repository content does not require redistributing third-party donor assets.
-4. Add release notes for approved project components.
-5. Keep `CURRENT_AUTHORITY.md` as the single project-wide status source.
+Completed initial repository foundation:
+
+- Compatibility matrix established.
+- Current authority file established.
+- Donor-safe patch/rebuild policy established.
+- Per-equipment patch specifications added for the active Bourgault 7950B and Seed Hawk 660 candidates.
+- Candidate SHA-256 records added.
+- Static candidate validation tool added.
+
+Remaining:
+
+1. Record runtime test logs and known-good game/mod versions after the next user test cycle.
+2. Add release notes for approved project components.
+3. Add automated rebuild tooling only where it can be made donor-safe and deterministic.
+4. Keep `CURRENT_AUTHORITY.md` as the single project-wide status source.
