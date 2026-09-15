@@ -52,6 +52,10 @@ Patch authority:
 
 `equipment/bourgault_7950/PATCH_SPEC.md`
 
+Tank 1 mechanical engineering authority:
+
+`equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+
 ### LOCKED capacity model
 
 Custom logical numbering is front-to-back:
@@ -103,19 +107,41 @@ This is a **Must Fix** for V7 before runtime testing.
 
 | Tank | Current discharge Z | Physical containment | Status |
 |---|---:|---|---|
-| Tank 1 | +1.650 m | inside A by only about 0.06 m at rear edge | **HOLD / runtime proof required** |
+| Tank 1 | +1.650 m | inside A by only about 0.06 m at rear edge | **HOLD / redesign target** |
 | Tank 2 | +0.493 m | inside B | TESTING; donor-range pose |
 | Tank 3 | -0.769 m | inside C | TESTING; donor-range pose |
 | Tank 4 | -1.792 m | centered on D | TESTING; donor-range pose |
 
-### Known Tank 1 mechanical concern
+### Tank 1 mechanical authority
 
-Tank 1 still requires additional forward articulation beyond the original two-reservoir donor animation envelope. Approximate primary-arm positions are:
+**ACTIVE — three-function solve required before V7 candidate promotion**
 
-- Arm 1: ~107.99 degrees versus ~100 degrees donor maximum.
-- Arm 2: ~-65.60 degrees versus ~-50 degrees donor maximum.
+The V6 Tank 1 pose still places the first two primary conveyor arms at approximately:
 
-Do not mark the Tank 1 conveyor position LOCKED until in-game testing confirms acceptable linkage/hose behavior and reliable trigger alignment. If refinement is needed, prefer using downstream articulation over increasing primary-arm overtravel.
+- Arm 1: ~107.99 degrees versus prior 7950 donor loading-envelope value near ~100 degrees.
+- Arm 2: ~-65.60 degrees versus prior 7950 donor loading-envelope value near ~-50 degrees.
+
+Manufacturer 7000-series operating documentation confirms three independent conveyor positioning functions:
+
+1. Inner Arm Swing — In / Out.
+2. Outer Arm Swing — In / Out.
+3. Conveyor Height — Up / Down.
+
+The documented tank-change procedure raises the spout clear with Conveyor Height, uses both swing arms to position over the selected opening, then lowers the spout into the opening. Therefore V7 must no longer treat Tank 1 as a two-joint reach problem.
+
+Preferred V7 Tank 1 discharge target is the opening-A center at **Z +2.121 m**, initially within **+/-0.15 m**. A provisional project-defined 0.20 m edge margin gives a minimum static acceptance band of **Z +1.790 to +2.452 m** until runtime trigger width is known.
+
+V7 solve priorities:
+
+- bring the first two swing joints back toward the actual 7950 donor loading envelope;
+- recover and use the donor's Conveyor Height/downstream articulation;
+- preserve spout orientation and insertion depth;
+- do not move the accepted Tank 1 opening/fill-volume geometry to accommodate the conveyor;
+- do not borrow joint values from the Bourgault 71300, which is comparative evidence only.
+
+The repository now includes `tools/extract_i3d_animation.py` to recover the exact `loadingPipe` animated hierarchy/keyframes from a donor or candidate ZIP when the current 7950 I3D is available.
+
+Do not mark Tank 1 LOCKED until both the donor-derived solve and runtime linkage/hose/trigger review pass.
 
 ### Fill-volume architecture
 
@@ -149,6 +175,7 @@ The suffix matcher remains heuristic. Explicit Realistic Seeder product registra
 - Historical V6 profile remains available as `bourgault7950-v6` for archive verification.
 - V7 profile is `bourgault7950-v7` and adds compatibility hardening checks plus load/unload node Z authority.
 - Exact flap animation timing remains a mandatory engineering review gate; node presence alone is not treated as proof of correct animation state.
+- Tank 1 kinematics remain an engineering gate; a static validator must not infer a valid pose from the presence of animation nodes alone.
 
 ---
 
@@ -275,9 +302,11 @@ Project-owned assets:
 
 - Compatibility scripts: `scripts/compatibility/`
 - Equipment patch specifications: `equipment/`
+- Bourgault Tank 1 engineering note: `equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
 - Donor-safe rebuild policy: `patches/README.md`
 - Candidate checksum authority: `builds/CANDIDATE_CHECKSUMS.md`
 - Static candidate validator: `tools/validate_candidate.py`
+- I3D animation extraction helper: `tools/extract_i3d_animation.py`
 
 Candidate ZIPs and extracted third-party donor trees remain intentionally excluded.
 
