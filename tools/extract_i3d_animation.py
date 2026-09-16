@@ -48,15 +48,33 @@ class SceneNode:
 
 
 def normalize_scene_path(value: str | None) -> str | None:
-    """Normalize a GIANTS mapping path to the portion below the I3D <Scene> root."""
+    """Normalize a GIANTS vehicle ``i3dMapping`` path into an I3D Scene path.
+
+    GIANTS mappings use a component/root selector before ``>``. For this cart the first
+    I3D Scene node is path ``0``. Therefore::
+
+        0>          -> 0
+        0>0         -> 0|0
+        0>0|6|0     -> 0|0|6|0
+
+    The prefix must *not* simply be discarded; doing so shifts every descendant one
+    level upward and breaks hierarchy resolution.
+    """
     if value is None:
         return None
     value = value.strip()
-    if ">" in value:
-        # For normal vehicle mappings such as 0>0|4|0, the prefix before > identifies
-        # the loaded I3D/component root. The remaining path addresses the I3D scene.
-        return value.split(">", 1)[1]
-    return value
+    if ">" not in value:
+        return value
+
+    root_selector, relative = value.split(">", 1)
+    root_selector = root_selector.strip()
+    relative = relative.strip()
+
+    if not root_selector:
+        return relative
+    if not relative:
+        return root_selector
+    return f"{root_selector}|{relative}"
 
 
 def read_from_source(source: pathlib.Path, member_path: str) -> bytes:
@@ -234,8 +252,6 @@ def segment_state(part: ET.Element, time_value: float) -> list[str]:
         states.append(f"{label}={interpolated or end_value}")
 
     if "startVisibility" in part.attrib or "endVisibility" in part.attrib:
-        # Visibility is discrete; report endpoints and alpha instead of guessing GIANTS'
-        # exact switching rule.
         states.append(
             "visibility="
             f"{part.attrib.get('startVisibility', '?')}->{part.attrib.get('endVisibility', '?')}"
