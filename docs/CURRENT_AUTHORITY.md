@@ -1,6 +1,6 @@
 # Current Project Authority
 
-_Last updated: 2026-09-15_
+_Last updated: 2026-09-16_
 
 This file is the governing coordination document for the FS25 Realistic Farming project.
 
@@ -55,6 +55,12 @@ Patch authority:
 Tank 1 mechanical engineering authority:
 
 `equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+
+Donor-safe V3 reference snapshot:
+
+`equipment/bourgault_7950/reference/`
+
+The V3 snapshot was captured from user-supplied archive SHA-256 `30eebabb116e1932a53f25b78feb41c37fdda66260933d05c560302db5f9d69a`. The archive itself is not stored in the public repository because it identifies author **Hispano** and contains no explicit redistribution license. The reference directory preserves the required animation, mapping, pivot, fill-root, fill-volume, outlet/effect, and hydraulic engineering data so this exact V3 ZIP should not need to be re-uploaded for future geometry work.
 
 ### LOCKED capacity model
 
@@ -114,32 +120,37 @@ This is a **Must Fix** for V7 before runtime testing.
 
 ### Tank 1 mechanical authority
 
-**ACTIVE — three-function solve required before V7 candidate promotion**
+**ACTIVE — donor-derived four-node solve required before V7 candidate promotion**
 
-The V6 Tank 1 pose still places the first two primary conveyor arms at approximately:
+The V6 Tank 1 pose places the first two primary conveyor arms at approximately:
 
-- Arm 1: ~107.99 degrees versus prior 7950 donor loading-envelope value near ~100 degrees.
-- Arm 2: ~-65.60 degrees versus prior 7950 donor loading-envelope value near ~-50 degrees.
+- Arm 1: ~107.99 degrees.
+- Arm 2: ~-65.60 degrees.
 
-Manufacturer 7000-series operating documentation confirms three independent conveyor positioning functions:
+The recovered V3 7950 animation now directly verifies the donor loading reference at:
 
-1. Inner Arm Swing — In / Out.
-2. Outer Arm Swing — In / Out.
-3. Conveyor Height — Up / Down.
+- Arm 1: **100 degrees**.
+- Arm 2: **-50 degrees**.
 
-The documented tank-change procedure raises the spout clear with Conveyor Height, uses both swing arms to position over the selected opening, then lowers the spout into the opening. Therefore V7 must no longer treat Tank 1 as a two-joint reach problem.
+It also proves that the 7950 donor has additional downstream articulation:
 
-Preferred V7 Tank 1 discharge target is the opening-A center at **Z +2.121 m**, initially within **+/-0.15 m**. A provisional project-defined 0.20 m edge margin gives a minimum static acceptance band of **Z +1.790 to +2.452 m** until runtime trigger width is known.
+- Arm 3: starts at **-135 degrees**, then articulates toward -64 and 0 degrees later in the animation.
+- Arm 4: includes rotation plus downstream translation.
+
+Manufacturer 7000-series operating documentation independently confirms three operator-facing conveyor positioning functions: Inner Arm Swing, Outer Arm Swing, and Conveyor Height. The recovered FS25 7950 hierarchy is consistent with this description. V7 must therefore not treat Tank 1 as a two-joint reach problem.
+
+Preferred V7 Tank 1 discharge target is opening-A center **Z +2.121 m**, initially within **+/-0.15 m**. A provisional project-defined 0.20 m edge margin gives a minimum static acceptance band of **Z +1.790 to +2.452 m** until runtime trigger width is known.
 
 V7 solve priorities:
 
-- bring the first two swing joints back toward the actual 7950 donor loading envelope;
-- recover and use the donor's Conveyor Height/downstream articulation;
+- bring Arms 1-2 back toward the verified V3 100 / -50 loading pose;
+- use recovered Arms 3-4/downstream articulation for the remaining positioning;
 - preserve spout orientation and insertion depth;
+- verify dependent hydraulic geometry;
 - do not move the accepted Tank 1 opening/fill-volume geometry to accommodate the conveyor;
-- do not borrow joint values from the Bourgault 71300, which is comparative evidence only.
+- do not borrow joint values from the Bourgault 71300.
 
-The repository now includes `tools/extract_i3d_animation.py` to recover the exact `loadingPipe` animated hierarchy/keyframes from a donor or candidate ZIP when the current 7950 I3D is available.
+The repository includes `tools/extract_i3d_animation.py` for later candidate comparisons. It now correctly resolves GIANTS root-relative mappings such as `0>0|6|0` to I3D scene path `0|0|6|0`.
 
 Do not mark Tank 1 LOCKED until both the donor-derived solve and runtime linkage/hose/trigger review pass.
 
@@ -283,7 +294,7 @@ The Bourgault and Seed Hawk scripts remain separate while their evidence bases d
 
 ### Bourgault
 
-- V3 — superseded: incorrect selector positions and startup state behavior.
+- V3 — superseded for candidate use, but its recovered donor-derived conveyor hierarchy is retained as a geometry/animation reference under `equipment/bourgault_7950/reference/`.
 - V4 — superseded: improved state handling and Realistic Seeder concept, but guessed conveyor targets and transformed combined fill meshes.
 - V5 — superseded: better geometry-derived targets, but excessive primary conveyor articulation and inadequate front fill-volume segmentation.
 - V6 — **HOLD historical candidate**: stronger four-tank architecture, but confirmed Tank 3 physical hatch timing defect and broad compatibility matcher.
@@ -303,8 +314,9 @@ Project-owned assets:
 - Compatibility scripts: `scripts/compatibility/`
 - Equipment patch specifications: `equipment/`
 - Bourgault Tank 1 engineering note: `equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+- Bourgault donor-safe reference snapshots: `equipment/bourgault_7950/reference/`
 - Donor-safe rebuild policy: `patches/README.md`
-- Candidate checksum authority: `builds/CANDIDATE_CHECKSUMS.md`
+- Candidate/reference checksum authority: `builds/CANDIDATE_CHECKSUMS.md`
 - Static candidate validator: `tools/validate_candidate.py`
 - I3D animation extraction helper: `tools/extract_i3d_animation.py`
 
