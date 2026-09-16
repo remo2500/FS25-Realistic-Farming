@@ -1,8 +1,18 @@
 # Bourgault 7950B Tank 1 Conveyor Engineering
 
-_Status: V7 engineering research / no donor-derived transform change promoted yet_
+_Status: V7 engineering research / V3 donor-derived hierarchy recovered / no V7 transform change promoted yet_
 
-This note isolates the remaining Tank 1 conveyor problem from the otherwise accepted four-compartment architecture. It records what is verified, what is only comparative evidence, and the exact solve procedure to use when the current 7950 donor I3D is available again.
+This note isolates the remaining Tank 1 conveyor problem from the otherwise accepted four-compartment architecture. It records what is verified, what is only comparative evidence, and the exact solve procedure to use for V7.
+
+A user-supplied working **4-Tank V3 front-to-rear** archive was recovered on 2026-09-16. The complete archive is not stored in the public repository because no redistribution license was present, but the required animation, mapping, pivot, fill-root, effect, and hydraulic reference data are now preserved under:
+
+`equipment/bourgault_7950/reference/`
+
+The recovered archive is identified by SHA-256:
+
+`30eebabb116e1932a53f25b78feb41c37fdda66260933d05c560302db5f9d69a`
+
+This V3 evidence is donor-derived reference material. It is **not** the later V6 Engineering archive and is not V7 authority by itself.
 
 ## 1. Problem statement
 
@@ -16,16 +26,60 @@ The audited physical Tank 1 opening (opening A) spans approximately:
 
 The V6 discharge point is therefore only about **0.060 m** inside the rear edge of the opening. That is geometrically inside the hatch but does not provide enough trigger or visual margin to treat the position as final.
 
-The existing Tank 1 pose also places the first two primary conveyor arms at approximately:
+The existing V6 Tank 1 pose places the first two primary conveyor arms at approximately:
 
 - primary arm 1: **107.99 degrees**
 - primary arm 2: **-65.60 degrees**
 
-The prior 7950 donor audit found the original loading envelope near **100 / -50 degrees** for those same primary joints. Until the exact current donor animation is re-extracted, those prior 7950 values remain the project-specific range authority. Do not replace them with values from another Bourgault cart.
+The recovered V3 `loadingPipe` animation independently confirms the earlier donor-envelope measurements:
 
-## 2. Manufacturer mechanical authority
+- `overloadingArm01` starts at **0 100 0**;
+- `overloadingArm02` starts at **0 -50 0**.
 
-Bourgault's 7000-series operating documentation establishes three distinct positioning functions for the load/unload conveyor:
+Those values are now direct project reference evidence rather than only a prior audit estimate. V7 should reduce the V6 overtravel back toward this verified 7950 loading pose instead of increasing it.
+
+## 2. Recovered V3 conveyor hierarchy
+
+The V3 vehicle XML and I3D mapping resolve the conveyor as a four-node nested chain:
+
+| Node | Vehicle mapping | I3D scene path | Static pivot translation |
+|---|---|---|---|
+| `overloadingArm01` | `0>0|6|0` | `0|0|6|0` | `-1.47003 1.56863 -1.22386` |
+| `overloadingArm02` | `0>0|6|0|0` | `0|0|6|0|0` | `-0.173656 0.727869 -3.68031` |
+| `overloadingArm03` | `0>0|6|0|0|0` | `0|0|6|0|0|0` | `-0.241337 0.219075 1.66861` |
+| `overloadingArm04` | `0>0|6|0|0|0|0` | `0|0|6|0|0|0|0` | `0 0.418 -0.045` |
+
+The recovered V3 animation segments establish that the donor mechanism is substantially richer than the first two swing rotations:
+
+- Arm 1: **100 -> 90 -> 0 degrees about Y**.
+- Arm 2: **-50 -> -33 -> 0 degrees about Y**.
+- Arm 3: **-135 -> -64 -> 0 degrees about Y**.
+- Arm 4: **21 -> 0 degrees about X**.
+- Arm 4 also performs a downstream translation late in the sequence:
+  - `0 0.28 -0.074` -> `0 0.611 -0.005`;
+  - then -> `0 0.418 -0.045` for the final transport position.
+
+Relevant outlet/effect references are also preserved:
+
+- `conveyorEffect`: local translation `0.00383 -0.226519 7.13227`, rotation `2.84426 0 0`.
+- `pipeEffect`: local translation `-0.00384 -0.258395 -4.10928`, rotation `-38.4184 65.9399 -129.594`.
+- `conveyorBelts`: local translation `1.88502 -0.783007 3.28103`.
+
+The four exact fill roots are children of the downstream conveyor assembly and their V3 mappings/transforms are preserved in `reference/V3_REFERENCE_COMPACT.json`.
+
+### Hydraulic dependency evidence
+
+The V3 XML also confirms that the visible hydraulic mechanisms are explicitly dependent on the animated conveyor nodes:
+
+- `overloadingArm01` drives `overloadingArm01Hydraulic`.
+- `overloadingArm02` drives `overloadingArm02Hydraulic`.
+- `overloadingArm04` drives `overloadingArm03Hydraulic`.
+
+The corresponding hydraulic reference transforms are preserved in the compact reference file. This matters for V7 because an apparently valid outlet coordinate can still produce an implausible hydraulic cylinder/linkage pose.
+
+## 3. Manufacturer mechanical authority
+
+Bourgault's 7000-series operating documentation establishes three operator-facing positioning functions for the load/unload conveyor:
 
 1. **Inner Arm Swing** — In / Out.
 2. **Outer Arm Swing** — In / Out.
@@ -37,21 +91,21 @@ The operating procedure for changing tank openings is mechanically important for
 - use Inner Arm Swing and Outer Arm Swing to manoeuvre the conveyor over the desired tank opening;
 - lower the conveyor so the spout is inside the tank top opening.
 
-This confirms that the real 7000-series conveyor is not a two-angle mechanism. Height articulation is a real third positioning function and should be preserved in the FS25 solution rather than forcing the first two swing joints beyond their normal loading envelope.
+The recovered V3 FS25 hierarchy is consistent with this manufacturer description: Arms 3-4 provide real downstream articulation beyond Arms 1-2. V7 should exploit those donor motions rather than forcing all additional Tank 1 reach into the first two swing joints.
 
 The Bourgault Model 7950 manufacturer page separately confirms that the 7950 was offered with a load/unload conveyor using a 10-inch tube and 15-inch belt.
 
 Bourgault support also lists model-specific instructions titled **Downspout Installation - 7950 A/C with a Conveyor (0252-41-01)**. The support index proves that a 7950-specific conveyor/downspout document exists, but its EzParts content has not yet been recovered into this project. Do not claim dimensions from that document until it is actually obtained.
 
-## 3. Comparative evidence — not 7950 authority
+## 4. Comparative evidence — not 7950 authority
 
-A publicly posted GIANTS/Bourgault 71300 I3D from FS22 uses a deeper conveyor hierarchy with additional downstream articulated nodes beneath the first two arms. Its loading animation drives four arm nodes and a downstream translation as well as the flap system.
+A publicly posted GIANTS/Bourgault 71300 I3D from FS22 also uses a deeper conveyor hierarchy with additional downstream articulated nodes beneath the first two arms.
 
-That comparison is useful because it demonstrates a plausible GIANTS implementation pattern for Bourgault conveyor height/downstream motion.
+That comparison is now secondary evidence only. The recovered 7950 V3 archive itself proves that the 7950 donor uses four animated arm nodes, so no 71300 transform is required to justify downstream articulation.
 
-It is **not** acceptable authority for 7950 joint angles, translations, node lengths, or keyframe values. In particular, do not use the 71300's larger primary-arm angles to justify the current 7950 Tank 1 overtravel.
+Do **not** use 71300 joint angles, translations, node lengths, or keyframe values as 7950 authority.
 
-## 4. V7 Tank 1 target envelope
+## 5. V7 Tank 1 target envelope
 
 V7 should target a position with meaningful margin inside opening A rather than merely crossing the edge.
 
@@ -71,55 +125,51 @@ The 0.20 m band is a project engineering margin, not a manufacturer dimension. R
 
 Current V6 at +1.650 m fails this preferred V7 margin even though it remains mathematically inside the physical opening.
 
-## 5. Mechanical constraints for the next solve
+## 6. Mechanical constraints for the next solve
 
-When the donor-derived V7 I3D is built, solve Tank 1 under these constraints:
+Solve Tank 1 under these constraints:
 
 1. **Do not move the physical tank opening or fill-volume envelope to meet the conveyor.** The Tank 1 opening and fill-volume geometry are already accepted.
 2. **Do not increase primary-arm overtravel beyond V6.** The goal is to reduce it.
-3. **Keep primary arm 1 and primary arm 2 within the verified 7950 donor loading envelope wherever possible.** Until re-extraction, use the prior approximately 100 / -50 degree values as conservative bounds.
-4. **Recover and use the donor's actual Conveyor Height/downstream articulation.** Determine which I3D node(s) represent this function before changing transforms.
+3. **Use the recovered V3 Arm 1 / Arm 2 start pose of 100 / -50 degrees as the verified donor loading reference.**
+4. **Use the actual Arm 3 / Arm 4 downstream articulation from the recovered 7950 hierarchy.**
 5. **Preserve spout orientation and insertion depth.** A solution that reaches the correct Z but points the downspout outside the hatch or leaves it above the trigger is not acceptable.
-6. **Do not disturb Tanks 2-4 unless their current poses conflict with the corrected shared animation.** Their existing discharge positions have much stronger opening margins.
-7. **Do not copy 71300 transforms into the 7950.** Comparative hierarchy may guide inspection only.
+6. **Check the dependent hydraulic geometry at every proposed Tank 1 pose.**
+7. **Do not disturb Tanks 2-4 unless their current poses conflict with the corrected shared animation.** Their existing discharge positions have much stronger opening margins.
+8. **Do not copy 71300 transforms into the 7950.**
 
-## 6. Donor-recovery solve procedure
+## 7. V7 solve procedure
 
-Once the current V6 candidate ZIP or original 7950 donor is available:
+The V3 hierarchy no longer needs to be re-uploaded to recover its baseline data. It is preserved in Git. The next engineering solve should proceed as follows:
 
-1. Extract `i3d/Series_7950B.i3d` and `xml/Series_7950B.xml`.
-2. Run `tools/extract_i3d_animation.py` against animation `loadingPipe`.
-3. Record every animated part, its node path/mapping name, parent hierarchy, and keyframes at the selector times 0 / 2 / 4 / 6 / 10 seconds.
-4. Identify which animated nodes correspond to:
-   - inner arm swing,
-   - outer arm swing,
-   - conveyor height/downstream articulation,
-   - downspout/effect root,
-   - front and rear flap groups.
-5. Recalculate the world-space discharge transform at all four selector stops using the actual 7950 hierarchy.
-6. For Tank 1, solve first for **Z +2.121 m** while constraining the two primary swing joints to the donor loading range.
-7. Use the actual downstream/height articulation to recover remaining reach and correct spout insertion height.
-8. If the exact center cannot be reached without violating donor geometry, accept the closest pose inside **+1.790 to +2.452 m** that minimizes:
-   - primary-joint overtravel,
-   - spout-to-opening-center distance,
-   - change from donor downstream articulation,
-   - hose/linkage distortion risk.
-9. Recalculate Tanks 2-4 after the shared animation is modified and ensure they remain inside their audited openings.
-10. Only then write the V7 I3D keyframes and add the resolved transforms to `PATCH_SPEC.md`.
+1. Use `reference/V3_REFERENCE_COMPACT.json` as the recovered 7950 V3 hierarchy/pivot baseline.
+2. Use `tools/extract_i3d_animation.py` on any later V6/V7 archive to identify candidate-specific differences from the V3 baseline.
+3. Recalculate the world-space outlet/discharge transform through Arms 1-4 using the real nested hierarchy.
+4. For Tank 1, hold Arms 1-2 at or near the verified **100 / -50** loading pose first.
+5. Solve Arm 3 / Arm 4 rotation/translation for a discharge target near **Z +2.121 m** while preserving plausible spout height and angle.
+6. Evaluate dependent hydraulic reference/cylinder geometry for the candidate pose.
+7. If exact center cannot be reached without violating donor geometry, accept the closest pose inside **+1.790 to +2.452 m** that minimizes:
+   - primary-joint overtravel;
+   - spout-to-opening-center distance;
+   - deviation from donor Arm 3 / Arm 4 articulation;
+   - hydraulic/hose/linkage distortion risk.
+8. Recalculate Tanks 2-4 after shared animation changes and ensure they remain inside their audited openings.
+9. Integrate the corrected front/rear flap timing into the same V7 animation sequence.
+10. Only then write/promote V7 animation values into `PATCH_SPEC.md` and generate a V7 candidate ZIP.
 
-## 7. What not to do
+## 8. What not to do
 
 - Do not retain Tank 1 at +1.650 m merely because the point is technically inside opening A.
 - Do not solve the reach problem by moving `exactFillRootNodeTank1` toward an incorrectly positioned spout.
 - Do not enlarge or shift the Tank 1 fill-volume mesh to hide conveyor misalignment.
-- Do not add more rotation to the first two joints before recovering the third real positioning function.
+- Do not add more rotation to Arms 1-2 before using the recovered Arm 3-4 articulation.
 - Do not infer 7950 limits from the 71300 animation.
 - Do not mark Tank 1 LOCKED from static calculations alone; hoses, linkage, trigger behavior and visual plausibility still require runtime review.
 
-## 8. Current engineering conclusion
+## 9. Current engineering conclusion
 
-The evidence now supports a stronger direction than the V6 approach: **V7 should be treated as a three-function conveyor-positioning problem, not a two-joint reach problem.**
+The recovered V3 files materially strengthen the V7 plan. We now have direct 7950 evidence for the **four-node conveyor hierarchy, the 100 / -50 donor loading pose on the first two arms, Arm 3 articulation, Arm 4 rotation/translation, outlet/effect transforms, and hydraulic dependencies**.
 
-The current +1.650 m Tank 1 target is a fallback reference, not the desired V7 target. The preferred next solve is centered near +2.121 m with the first two swing joints brought back toward the actual 7950 donor loading envelope and the donor's Conveyor Height/downstream articulation used for the remaining positioning work.
+Therefore the V7 Tank 1 solution should no longer be based on extrapolating the first two arms. The preferred next solve is centered near **Z +2.121 m**, keeping Arms 1-2 near their verified V3 loading pose and obtaining the remaining positioning from the donor's actual downstream Arm 3 / Arm 4 mechanism.
 
-No new Tank 1 keyframe values are promoted by this note because the exact current 7950 I3D hierarchy is not presently available in the repository.
+What is still missing is the exact later **V6** animation/XML/I3D state, if we want to reproduce or compare the V6-specific +1.650 m pose byte-for-byte. The V3 baseline itself is now preserved in Git and should not need to be re-uploaded for future geometry work.
