@@ -52,9 +52,10 @@ Patch authority:
 
 `equipment/bourgault_7950/PATCH_SPEC.md`
 
-Tank 1 mechanical engineering authority:
+Tank 1 engineering authorities:
 
-`equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+- `equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+- `equipment/bourgault_7950/V7_KINEMATIC_SOLVE.md`
 
 Donor-safe V3 reference snapshot:
 
@@ -102,57 +103,97 @@ Required selector/flap relationship:
 - Tanks 3-4 -> `tankFlapsBack` open.
 - At Tank 3 selector stop **0.400 / 4 s**, the rear flap group must be fully open and the front group fully closed.
 
+Recovered donor animation establishes the flap transforms:
+
+- open: approximately `0 0 -100`
+- closed: approximately `0 0 0`
+
 Required transition:
 
 - Front group open through 2 s, closes 2-4 s, remains closed afterward.
 - Rear group closed through 2 s, opens 2-4 s, remains open through Tank 4, then closes during transport/stow.
 
-This is a **Must Fix** for V7 before runtime testing.
+The V7 validator now samples the actual `loadingPipe` animation and verifies the Tank 2 / Tank 3 / Tank 4 / transport flap states. Node presence alone is no longer considered sufficient.
 
-### Current conveyor targets
+### Current conveyor positions
 
-| Tank | Current discharge Z | Physical containment | Status |
+| Tank | Current/historical discharge Z | Physical containment | Status |
 |---|---:|---|---|
-| Tank 1 | +1.650 m | inside A by only about 0.06 m at rear edge | **HOLD / redesign target** |
-| Tank 2 | +0.493 m | inside B | TESTING; donor-range pose |
-| Tank 3 | -0.769 m | inside C | TESTING; donor-range pose |
+| Tank 1 | V6 +1.650 m | inside A by only about 0.06 m at rear edge | **HOLD / superseded Tank 1 pose** |
+| Tank 2 | +0.493 m | inside B | TESTING; donor-derived pose |
+| Tank 3 | -0.769 m | inside C | TESTING; donor-derived pose |
 | Tank 4 | -1.792 m | centered on D | TESTING; donor-range pose |
 
 ### Tank 1 mechanical authority
 
-**ACTIVE — donor-derived four-node solve required before V7 candidate promotion**
+**ACTIVE — donor-validated kinematic solve completed; runtime visual/trigger proof still required**
 
-The V6 Tank 1 pose places the first two primary conveyor arms at approximately:
+The uploaded V3 reference directly verifies the loading pose and full nested conveyor hierarchy:
 
-- Arm 1: ~107.99 degrees.
-- Arm 2: ~-65.60 degrees.
+- Arm 1: +100 degrees Y
+- Arm 2: -50 degrees Y
+- Arm 3: -135 degrees Y
+- Arm 4: +21 degrees X
+- Arm 4 translation: `0 0.28 -0.074`
 
-The recovered V3 7950 animation now directly verifies the donor loading reference at:
+A donor-safe forward model is stored at:
 
-- Arm 1: **100 degrees**.
-- Arm 2: **-50 degrees**.
+`tools/bourgault7950_forward_kinematics.py`
 
-It also proves that the 7950 donor has additional downstream articulation:
+The model independently reproduces the historical V6 Tank 1 result: applying Arm 1 = 107.99 degrees and Arm 2 = -65.60 degrees gives pipe-effect Z **+1.651514 m**, within about 1.5 mm of the earlier +1.650 m geometry audit. This validates the recovered transform convention strongly enough for static engineering.
 
-- Arm 3: starts at **-135 degrees**, then articulates toward -64 and 0 degrees later in the animation.
-- Arm 4: includes rotation plus downstream translation.
+A numerical search across the complete observed V3 articulation ranges found no donor-range-only pose capable of reaching opening A. With the existing conveyor geometry, some controlled overtravel is therefore unavoidable for the new front Tank 1.
 
-Manufacturer 7000-series operating documentation independently confirms three operator-facing conveyor positioning functions: Inner Arm Swing, Outer Arm Swing, and Conveyor Height. The recovered FS25 7950 hierarchy is consistent with this description. V7 must therefore not treat Tank 1 as a two-joint reach problem.
+#### Recommended first V7 Tank 1 pose
 
-Preferred V7 Tank 1 discharge target is opening-A center **Z +2.121 m**, initially within **+/-0.15 m**. A provisional project-defined 0.20 m edge margin gives a minimum static acceptance band of **Z +1.790 to +2.452 m** until runtime trigger width is known.
+Target pipe position: **Z +1.900 m**.
 
-V7 solve priorities:
+Recommended animation state:
 
-- bring Arms 1-2 back toward the verified V3 100 / -50 loading pose;
-- use recovered Arms 3-4/downstream articulation for the remaining positioning;
-- preserve spout orientation and insertion depth;
-- verify dependent hydraulic geometry;
-- do not move the accepted Tank 1 opening/fill-volume geometry to accommodate the conveyor;
-- do not borrow joint values from the Bourgault 71300.
+- Arm 1 = **+105.164095 degrees**
+- Arm 2 = **-59.356622 degrees**
+- Arm 3 = **-145.314298 degrees**
+- Arm 4 = **+21 degrees**
+- Arm 4 translation = **`0 0.28 -0.074`**
 
-The repository includes `tools/extract_i3d_animation.py` for later candidate comparisons. It now correctly resolves GIANTS root-relative mappings such as `0>0|6|0` to I3D scene path `0|0|6|0`.
+Forward-model pipe result:
 
-Do not mark Tank 1 LOCKED until both the donor-derived solve and runtime linkage/hose/trigger review pass.
+- X approximately 0.000 m
+- Y approximately +4.027 m
+- Z approximately +1.900 m
+
+Opening-A margin:
+
+- 0.310 m inside the rear edge
+- 0.752 m inside the front edge
+- 0.221 m rearward of opening center
+
+Modeled Arm-1/Arm-2 hydraulic extension versus donor loading pose:
+
+- Arm 1: +1.722%
+- Arm 2: +4.432%
+
+Compared with V6, this reduces excess hydraulic extension by approximately **34.4% on Arm 1** and **40.6% on Arm 2** while increasing the physical opening margin substantially.
+
+The exact opening-center solution at Z +2.121 m remains a valid secondary option:
+
+- Arm 1 = +106.584529 degrees
+- Arm 2 = -60.997442 degrees
+- Arm 3 = -146.992740 degrees
+- Arm 4 = +21 degrees
+
+Do not use that larger articulation unless the +1.900 m runtime trigger/visual test shows insufficient margin.
+
+An Arm-3-only solution was evaluated and rejected as the primary approach because it would require approximately -155.356 degrees at Z +1.900 m or -158.663 degrees at the opening center, concentrating too much overtravel into one joint without visual collision proof.
+
+### Tank 2 / Tank 3 donor-state confirmation
+
+The recovered hierarchy confirms:
+
+- donor loading state `100 / -50 / -135 / 21` gives pipe Z approximately **+0.491 m**, effectively the V6 Tank 2 target +0.493 m;
+- donor state `90 / -33 / -135 / 21` gives pipe Z approximately **-0.775 m**, effectively the V6 Tank 3 target -0.769 m.
+
+These positions should stay close to their donor-derived states in V7. Tank 1 is the special-reach case.
 
 ### Fill-volume architecture
 
@@ -184,9 +225,9 @@ The suffix matcher remains heuristic. Explicit Realistic Seeder product registra
 ### Static validation
 
 - Historical V6 profile remains available as `bourgault7950-v6` for archive verification.
-- V7 profile is `bourgault7950-v7` and adds compatibility hardening checks plus load/unload node Z authority.
-- Exact flap animation timing remains a mandatory engineering review gate; node presence alone is not treated as proof of correct animation state.
-- Tank 1 kinematics remain an engineering gate; a static validator must not infer a valid pose from the presence of animation nodes alone.
+- V7 profile is `bourgault7950-v7` and checks compatibility hardening, load/unload node authority, selector stops, actual flap animation states, and Tank 1 forward kinematics.
+- V7 Tank 1 static acceptance requires the pipe Z to remain inside **+1.790 to +2.452 m**, stay reasonably close to the tank centerline, and not worsen the V6 Arm-1/Arm-2 overtravel ceilings.
+- Static kinematics do not replace visual/runtime inspection of the Arm-3 joint, hoses, collision behavior, or fill trigger.
 
 ---
 
@@ -314,11 +355,13 @@ Project-owned assets:
 - Compatibility scripts: `scripts/compatibility/`
 - Equipment patch specifications: `equipment/`
 - Bourgault Tank 1 engineering note: `equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+- Bourgault V7 kinematic solve: `equipment/bourgault_7950/V7_KINEMATIC_SOLVE.md`
 - Bourgault donor-safe reference snapshots: `equipment/bourgault_7950/reference/`
 - Donor-safe rebuild policy: `patches/README.md`
 - Candidate/reference checksum authority: `builds/CANDIDATE_CHECKSUMS.md`
 - Static candidate validator: `tools/validate_candidate.py`
 - I3D animation extraction helper: `tools/extract_i3d_animation.py`
+- Bourgault forward-kinematics helper: `tools/bourgault7950_forward_kinematics.py`
 
 Candidate ZIPs and extracted third-party donor trees remain intentionally excluded.
 
@@ -336,6 +379,7 @@ A cart may be promoted from TESTING to LOCKED/approved only after:
 - Every compartment accepts normal seeds and fertilizer.
 - Every compartment accepts at least one known Realistic Seeder crop-specific seed product.
 - Conveyor position aligns with the intended physical opening and the correct lid/flap group is open.
+- Tank 1 Arm-3/linkage/hose/collision behavior is visually plausible at its special-reach pose.
 - Product heaps stay within intended compartment walls.
 - Attached drill can consume the correct product from each compartment.
 - Save/reload preserves fill type, fill level, and selector/cover state.
