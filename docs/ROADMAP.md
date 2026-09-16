@@ -1,6 +1,6 @@
 # FS25 Realistic Farming Roadmap
 
-_Last updated: 2026-09-15_
+_Last updated: 2026-09-16_
 
 This roadmap defines the recommended order of work. Changes should be reflected in `CURRENT_AUTHORITY.md` when they alter locked architecture.
 
@@ -28,6 +28,8 @@ Next when runtime testing is available:
 
 ### 2. Bourgault 7950B
 
+#### Historical foundation
+
 Completed through V6:
 
 - Four front-to-back logical tanks established at 9,691 / 1,938 / 4,228 / 17,618 L.
@@ -37,34 +39,52 @@ Completed through V6:
 - Separate physical fill-volume envelopes established with high-confidence static geometry.
 - V6 compatibility bridge and initial validator created.
 
-New audit result:
+V6 remains **HOLD** because Tank 3 belongs to `tankFlapsBack` while V6 leaves that group closed at selector stop 0.400. V6 also retains an over-broad compatibility matcher and a superseded Tank 1 reach strategy.
 
-- V6 is **HOLD** because the Tank 3 physical opening belongs to `tankFlapsBack`, but V6 still has that flap group closed at selector stop 0.400 / 4 s.
-- V6 also retains an over-broad custom-seed matcher and unrestricted product propagation.
+#### V7 static engineering — COMPLETE for first runtime cycle
 
-Current work — V7 static hardening:
+Completed:
 
-1. Correct flap authority: Tanks 1-2 front group; Tanks 3-4 rear group.
-2. Implement transition so front closes and rear opens during 2-4 s; rear must be fully open at Tank 3.
-3. Harden compatibility to category authority + crop-specific `SEED` suffix fallback.
-4. Prevent arbitrary products supported by only one unit from propagating to all four tanks.
-5. Expand validator coverage for V7 and retain V6 profile for historical verification.
-6. Preserve the accepted fill-volume segmentation and selector/discharge coordinates unless new evidence requires change.
-7. Keep Tank 1 mechanical reach as the remaining runtime engineering HOLD; if refinement is needed, seek downstream articulation before increasing primary-arm overtravel.
-8. Generate a new versioned V7 candidate only from the donor/V6 engineering base; do not overwrite V6.
+1. Captured donor-safe engineering reference from the user-supplied Hispano V3 archive.
+2. Recovered the actual four-arm conveyor hierarchy and donor loading transforms.
+3. Built a forward-kinematics model and independently reproduced V6 Tank 1 Z +1.650 m within about 1.5 mm.
+4. Proved that no pose confined to the observed donor animation ranges can reach the new front Tank 1 opening.
+5. Calculated a distributed Tank 1 reach solution targeting Z +1.900 m with lower modeled Arm-1/Arm-2 hydraulic penalty than V6.
+6. Corrected flap authority: Tanks 1-2 front group; Tanks 3-4 rear group.
+7. Implemented the 2-4 s front-to-rear flap transition so Tank 3 has rear open/front closed at 0.400.
+8. Hardened compatibility to normal `seeds fertilizer` category authority plus the narrower crop-specific `SEED` suffix fallback.
+9. Removed V6's arbitrary supported-product union behavior.
+10. Expanded the V7 validator to sample actual flap animation states and reconstruct Tank 1 pipe kinematics.
+11. Added a donor-SHA-guarded deterministic rebuild tool: `tools/build_bourgault_v7_from_v3.py`.
+12. Generated the reproducible V7 engineering candidate:
+    - `FS25_Bourgault_3320_4Tank_V7_Engineering.zip`
+    - SHA-256 `190b358ed1f21b411a11eb2d4cd0fc1d59f6f6cd293f93f9e7e239b307a17e2d`
+    - 61 ZIP entries
+13. Completed a donor-aware static engineering audit: **30/30 PASS**.
+14. Verified V7 introduces no new I3D `nodeId` collisions beyond the donor's existing TransformGroup/UserAttribute pairings.
+15. Verified two independent rebuilds produce byte-identical V7 ZIPs.
 
-Next when runtime testing is available:
+#### Next — V7 runtime validation
 
-1. Verify V7 fresh-purchase stow state.
-2. Verify correct flap group at every selector position, especially Tank 3.
-3. Verify conveyor positions for Tanks 1-4 from overhead and side views.
-4. Evaluate Tank 1 linkage, hose, collision, and trigger tolerance.
-5. Test crop-specific Realistic Seeder seed acceptance in all four tanks.
-6. Test normal and expected custom dry fertilizers in all four tanks.
-7. Inspect heap separation.
-8. Verify attached drill consumption.
-9. Save/reload and multiplayer test.
-10. Promote only after flap timing, Tank 1, and heap geometry pass.
+When testing is available:
+
+1. Install only the V7 development copy; disable older Bourgault variants.
+2. Buy a fresh cart and review `log.txt` immediately.
+3. Verify fresh-purchase transport/stow state.
+4. Cycle Tank 1 -> Tank 2 -> Tank 3 -> Tank 4 -> transport.
+5. Capture overhead and side views of every selector state.
+6. Verify the intended flap group at every stop, especially Tank 3 rear-open/front-closed.
+7. Inspect Tank 1's distributed reach pose for Arm-3 linkage, hose stretch, collision, lid clearance, downspout insertion, and visual plausibility.
+8. Verify each exact-fill trigger fills only its selected compartment.
+9. Test crop-specific Realistic Seeder seed acceptance in all four tanks.
+10. Test normal and expected custom dry fertilizers in all four tanks.
+11. Inspect heap separation and Tank 4 main/FLEX presentation.
+12. Verify attached drill consumption from all compartments.
+13. Save/reload with different products in all four tanks.
+14. Multiplayer test if required.
+15. Promote only after all Must Fix runtime items pass.
+
+If Tank 1's Z +1.900 m position lacks sufficient trigger or visual margin, evaluate the precomputed distributed center solution at Z +2.121 m before revisiting the older V6-style two-joint strategy.
 
 ## Phase 2 — Shared compatibility architecture
 
@@ -119,11 +139,14 @@ Completed foundation:
 - Per-equipment patch specifications added.
 - Candidate SHA-256 records added.
 - Static candidate validation tool added.
-- V7 static-hardening branch established.
+- Bourgault V3 donor-safe reference snapshot added.
+- Bourgault forward-kinematics and animation-inspection tools added.
+- Deterministic, source-guarded V7 rebuild tool added.
+- Reproducible V7 candidate generated and statically audited.
 
 Remaining:
 
-1. Produce donor-safe deterministic V7 patch/build tooling once the exact flap-animation edit is represented reliably.
-2. Record runtime test logs and known-good game/mod versions after the next user test cycle.
-3. Add release notes for approved project components.
-4. Keep `CURRENT_AUTHORITY.md` as the single project-wide status source.
+1. Record runtime test logs and known-good game/mod versions after the next user test cycle.
+2. Add release notes for approved project components.
+3. Keep `CURRENT_AUTHORITY.md` as the single project-wide status source.
+4. Merge/promote the V7 static-hardening branch only after runtime evidence supports promotion.
