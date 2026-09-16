@@ -114,7 +114,7 @@ All are normally parked vertically out of range and the `loadingPipe` animation 
 
 ## Manufacturer conveyor-motion authority
 
-Bourgault 7000-series operating documentation defines three separate conveyor positioning functions:
+Bourgault 7000-series operating documentation defines three separate operator-facing conveyor positioning functions:
 
 - **Inner Arm Swing** — In / Out
 - **Outer Arm Swing** — In / Out
@@ -122,13 +122,31 @@ Bourgault 7000-series operating documentation defines three separate conveyor po
 
 The manufacturer procedure for changing tank openings is to raise the spout clear with Conveyor Height, use Inner and Outer Arm Swing to move over the desired opening, then lower the spout into the opening.
 
-This matters directly to V7: the 7950 conveyor should be treated as a **three-function positioning mechanism**, not a two-joint mechanism whose first two joints must supply all additional Tank 1 reach.
+The recovered FS25 7950 reference confirms that the actual game hierarchy contains a nested four-arm mechanism:
+
+- `overloadingArm01`
+- `overloadingArm02`
+- `overloadingArm03`
+- `overloadingArm04`
+
+Recovered donor loading pose:
+
+- Arm 1 = +100 degrees Y
+- Arm 2 = -50 degrees Y
+- Arm 3 = -135 degrees Y
+- Arm 4 = +21 degrees X
+- Arm 4 translation = `0 0.28 -0.074`
 
 The Bourgault Model 7950 product authority confirms that the 7950 was available with a load/unload conveyor using a 10-inch tube and 15-inch belt. Bourgault support also lists model-specific instruction `0252-41-01`, **Downspout Installation - 7950 A/C with a Conveyor**. The contents/dimensions of that EzParts document have not yet been recovered, so do not infer unpublished dimensions from its title.
 
-Detailed Tank 1 engineering authority is maintained in:
+Detailed Tank 1 authorities:
 
-`equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+- `equipment/bourgault_7950/TANK1_CONVEYOR_ENGINEERING.md`
+- `equipment/bourgault_7950/V7_KINEMATIC_SOLVE.md`
+
+Reproducible forward model:
+
+`tools/bourgault7950_forward_kinematics.py`
 
 ## Conveyor selector states
 
@@ -151,61 +169,107 @@ The last cover state must explicitly define:
 
 V6 is wrong at Tank 3 because the rear flap group is still closed at 4 s.
 
-V7 must implement the two-group sequence below:
+The recovered V3 animation confirms that the physical flap transforms use approximately **-100 degrees Z for open** and **0 degrees Z for closed**. V7 must implement the two-group sequence below:
 
 - `tankFlapsFront`
-  - open for Tanks 1 and 2;
+  - open (`0 0 -100`) for Tanks 1 and 2;
   - remain open through the Tank 2 stop at 2 s;
   - close during the 2-4 s transition;
-  - be fully closed at the Tank 3 stop and thereafter.
+  - be fully closed (`0 0 0`) at the Tank 3 stop and thereafter.
 - `tankFlapsBack`
-  - remain closed through the Tank 2 stop at 2 s;
+  - remain closed (`0 0 0`) through the Tank 2 stop at 2 s;
   - open during the 2-4 s transition;
-  - be fully open at the Tank 3 stop at 4 s;
+  - be fully open (`0 0 -100`) at the Tank 3 stop at 4 s;
   - remain open through Tank 4 at 6 s;
   - close during the transport/stow portion of the animation.
 
 Static acceptance invariant: at selector stop 0.400, `tankFlapsBack` must be fully open and `tankFlapsFront` must be fully closed.
 
-## Current discharge positions and V7 target
+## Current discharge positions
 
 These are discharge positions, not necessarily opening centers:
 
-| Tank | Current discharge Z | Opening containment | Status |
+| Tank | Current/historical discharge Z | Physical containment | Status |
 |---|---:|---|---|
-| 1 | +1.650 m | inside A by only ~0.06 m at rear edge | HOLD: insufficient margin / primary-arm overtravel |
+| 1 | V6 +1.650 m | inside A by only ~0.06 m at rear edge | HOLD: insufficient margin / concentrated overtravel |
 | 2 | +0.493 m | inside B | donor-range pose |
 | 3 | -0.769 m | inside C | donor-range pose |
 | 4 | -1.792 m | centered on D | donor-range pose |
 
-Tank 1 currently uses approximately 107.99 degrees / -65.60 degrees on the first two primary arms versus prior 7950 donor loading-envelope values near 100 / -50 degrees. V7 should reduce, not increase, that overtravel.
+The forward-kinematics reconstruction independently reproduces the V6 Tank 1 result. Using Arm 1 = 107.99 degrees and Arm 2 = -65.60 degrees with the recovered downstream donor pose produces pipe-effect Z **+1.651514 m**, within about 1.5 mm of the historical +1.650 m audit value.
 
-### Tank 1 preferred solve
+This validates the recovered hierarchy/rotation convention strongly enough to use it for V7 static engineering.
 
-Opening A center is **Z +2.121 m**. V7 should first attempt to place the discharge near this center while keeping the first two swing joints within the actual 7950 donor loading envelope and using the donor's Conveyor Height/downstream articulation for remaining positioning.
+## Tank 1 V7 kinematic recommendation
 
-Preferred engineering target:
+Opening A:
 
-- Z **+2.121 m**
-- initial center tolerance **+/-0.15 m**
+- rear edge Z +1.590 m
+- center Z +2.121 m
+- front edge Z +2.652 m
 
-Provisional minimum static acceptance band, using a project-defined 0.20 m edge margin until runtime trigger width is known:
+The project provisional acceptance band remains **Z +1.790 to +2.452 m** (0.20 m inside either edge). Numerical search of the actual recovered V3 articulation ranges proves that a donor-range-only solution cannot reach opening A at all; some controlled overtravel is unavoidable unless the physical conveyor geometry itself is remodeled.
 
-- Z **+1.790 to +2.452 m**
+### Recommended first V7 stop — Z +1.900 m
 
-This 0.20 m margin is a project engineering criterion, not a manufacturer dimension. Runtime trigger testing may justify changing it later.
+Use this as the first engineering candidate, pending visual/runtime review:
+
+- Arm 1 = **+105.164095 degrees**
+- Arm 2 = **-59.356622 degrees**
+- Arm 3 = **-145.314298 degrees**
+- Arm 4 = **+21 degrees**
+- Arm 4 translation = **`0 0.28 -0.074`**
+
+Forward-model result:
+
+- X = approximately `0.000000 m`
+- Y = approximately `+4.026976 m`
+- Z = approximately `+1.900000 m`
+
+Opening-A margins:
+
+- rear-edge margin = **0.310 m**
+- front-edge margin = **0.752 m**
+- offset from center = **-0.221 m**
+
+Modeled cylinder-length change versus the original loading pose:
+
+- Arm 1 hydraulic: **+1.722%**
+- Arm 2 hydraulic: **+4.432%**
+
+Relative to V6, this reduces excess hydraulic extension by approximately 34.4% on Arm 1 and 40.6% on Arm 2 while gaining substantially more opening margin.
+
+### Secondary option — opening center Z +2.121 m
+
+If runtime filling/visual alignment shows that +1.900 m is not sufficient, use the distributed center solution rather than returning to V6-style two-joint overtravel:
+
+- Arm 1 = **+106.584529 degrees**
+- Arm 2 = **-60.997442 degrees**
+- Arm 3 = **-146.992740 degrees**
+- Arm 4 = **+21 degrees**
+
+This reaches X approximately 0 / Y +4.026976 / Z +2.121000 m, with modeled Arm-1/Arm-2 cylinder increases of approximately +2.180% / +5.224% versus donor loading pose.
+
+### Rejected primary approach — Arm-3-only reach
+
+Keeping Arms 1-2 at exactly 100 / -50 degrees would require Arm 3 around:
+
+- -153.730 degrees to reach Z +1.790 m
+- -155.356 degrees to reach Z +1.900 m
+- -158.663 degrees to reach Z +2.121 m
+
+That concentrates 18.7-23.7 degrees of overtravel into one downstream joint. It remains a useful sensitivity reference but is not the preferred V7 candidate without visual collision/linkage proof.
 
 Do not move the Tank 1 opening, fill volume, or exact-fill root simply to accommodate a poorly positioned spout.
 
-Before writing new Tank 1 keyframes, recover the actual 7950 animation hierarchy and identify which nodes implement Inner Arm Swing, Outer Arm Swing, and Conveyor Height. Use:
+## Tank 2 / Tank 3 donor-state confirmation
 
-```bash
-python tools/extract_i3d_animation.py <candidate-or-donor.zip> \
-  --i3d-path i3d/Series_7950B.i3d \
-  --animation loadingPipe
-```
+The recovered forward model explains why the later V6 positions were strong:
 
-Comparative Bourgault 71300 I3D evidence may be used only to guide hierarchy inspection. Its angles/translations are **not** valid 7950 limits.
+- donor loading state `100 / -50 / -135 / 21` gives pipe Z approximately **+0.491 m**, effectively the V6 Tank 2 target +0.493 m;
+- donor state `90 / -33 / -135 / 21` gives pipe Z approximately **-0.775 m**, effectively the V6 Tank 3 target -0.769 m.
+
+Tanks 2 and 3 should therefore stay very close to these donor-derived states while Tank 1 receives the special distributed forward-reach pose.
 
 ## Cart-level sprayer representative
 
@@ -249,14 +313,14 @@ The V7 profile must reject:
 - discharge targets outside the audited physical opening spans;
 - Tank 3 rear-flap timing that leaves `tankFlapsBack` closed at 0.400.
 
-The validator must not claim that node presence alone proves the Tank 1 kinematics or flap state. Those remain animation/engineering review gates until the actual keyframes are inspected.
+The validator must not claim that node presence alone proves acceptable Tank 1 linkage/hose geometry. The forward-model values may be checked statically, but visual/runtime promotion remains mandatory.
 
 ## Runtime promotion blockers
 
 Before V7 can be promoted:
 
-- Confirm Tank 1 linkage/hose behavior and fill-trigger reliability.
-- Confirm Tank 1 discharge has meaningful margin inside opening A.
+- Confirm Tank 1 Arm-3 joint/linkage/hose behavior at the recommended +1.900 m pose.
+- Confirm Tank 1 fill-trigger reliability and visible spout alignment.
 - Confirm the corrected Tank 3 rear flap is visibly open.
 - Confirm each selector stop fills only its intended tank.
 - Confirm all four tanks accept a known Realistic Seeder crop-specific seed.
