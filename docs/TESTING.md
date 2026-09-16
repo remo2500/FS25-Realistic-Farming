@@ -1,6 +1,6 @@
 # Runtime Testing Protocol
 
-_Last updated: 2026-09-15_
+_Last updated: 2026-09-16_
 
 Use this protocol before promoting any air-cart build from TESTING to approved/LOCKED.
 
@@ -38,41 +38,77 @@ Use this protocol before promoting any air-cart build from TESTING to approved/L
 
 ## Bourgault 7950B — V7 required test
 
-Do **not** use V6 for the next promotion test. V6 has a confirmed Tank 3 physical-hatch timing defect.
+**Next runtime candidate:**
 
-1. Purchase a fresh V7 cart.
-2. Confirm the conveyor is fully stowed at purchase.
-3. Cycle selector states Tank 1 -> Tank 2 -> Tank 3 -> Tank 4 -> closed.
-4. Capture overhead and side screenshots at each tank position.
-5. Verify discharge point is physically inside the intended opening.
-6. Verify flap state at each selector:
+`FS25_Bourgault_3320_4Tank_V7_Engineering.zip`
+
+SHA-256:
+
+`190b358ed1f21b411a11eb2d4cd0fc1d59f6f6cd293f93f9e7e239b307a17e2d`
+
+Pre-runtime status: **30/30 donor-aware static engineering checks PASS**.
+
+Do **not** use V6 for the next promotion test. V6 has a confirmed Tank 3 physical-hatch timing defect and its Tank 1 pose has been superseded by the distributed V7 solve.
+
+1. Remove/disable V3/V4/V5/V6 development copies so only the V7 mod is active.
+2. Purchase a **fresh V7 cart**. Do not use an existing savegame cart as the first test.
+3. Confirm no XML/Lua/specialization errors appear during purchase/load.
+4. Confirm the conveyor is fully stowed/closed at purchase.
+5. Cycle selector states Tank 1 -> Tank 2 -> Tank 3 -> Tank 4 -> closed/transport.
+6. Capture overhead and side screenshots at every selector position.
+7. Verify discharge point is physically inside the intended opening.
+8. Verify flap state at each selector:
    - Tank 1: front flap group open.
    - Tank 2: front flap group open.
-   - Tank 3: **rear flap group fully open and front group closed**.
+   - Tank 3: **rear flap group fully open and front group fully closed**.
    - Tank 4: rear flap group open.
-   - Transport: both groups returned to the intended stowed/closed state.
-7. Inspect Tank 1 carefully for impossible arm/linkage angles, stretched/intersecting hoses, collision with tank/lids, and unreliable fill-trigger position.
-8. Test the same known Realistic Seeder crop-specific seed in Tanks 1-4.
-9. Confirm fertilizer is accepted in Tanks 1-4, including any expected dry fertilizer products supplied through the installed fertilizer category extensions.
-10. Fill all four logical tanks with distinguishable products.
-11. Capture an overhead screenshot of product heaps.
-12. Confirm Tank 1/2/3 heap separation and Tank 4 main/FLEX visual behavior.
-13. Attach the intended Bourgault drill and confirm consumption from every compartment.
-14. Save/reload with different products and non-zero fill levels in all four tanks.
-15. Verify selector/cover state and fill data survive reload.
-16. Review `log.txt`.
+   - Transport: both flap groups closed/stowed.
+9. Inspect **Tank 1** especially closely. Static V7 engineering predicts approximately:
+   - Arm 1: `+105.164095 deg`
+   - Arm 2: `-59.356622 deg`
+   - Arm 3: `-145.314298 deg`
+   - Arm 4: `+21 deg`
+   - pipe position: approximately `X 0.000 / Y +4.027 / Z +1.900 m`
+   - opening-A rear-edge margin: approximately `0.310 m`
+10. For Tank 1, inspect the Arm-3 joint, hydraulic/linkage behavior, hoses, nearby tank structure, lid clearance, collision/intersection, and downspout insertion depth. The static solve deliberately distributes reach across Arms 1-3 and still requires visual proof.
+11. Verify only the selected tank presents an active exact-fill trigger. Filling Tank 1 must not fill Tanks 2-4, and repeat this isolation test for every selector stop.
+12. Test the same known Realistic Seeder crop-specific seed in Tanks 1-4.
+13. Confirm fertilizer is accepted in Tanks 1-4, including any expected dry fertilizer products supplied through the installed fertilizer category extensions.
+14. Fill all four logical tanks with distinguishable products.
+15. Capture an overhead screenshot of product heaps.
+16. Confirm Tank 1/2/3 heap separation and Tank 4 main/FLEX visual behavior.
+17. Attach the intended Bourgault drill and confirm consumption from every compartment.
+18. Save/reload with different products and non-zero fill levels in all four tanks.
+19. Verify selector/cover state and fill data survive reload.
+20. Review `log.txt` for XML, Lua, fill-unit, animation, missing-node, specialization, or fill-source warnings/errors.
 
-### Bourgault pass criteria
+### Bourgault V7 pass criteria
 
+- Fresh cart loads and purchases without XML/Lua errors.
 - Fresh cart starts in transport/stowed state.
 - Correct physical flap group is open at every selector position.
 - Tank 3 no longer presents its fill point through a closed hatch.
 - All four selector positions are mechanically believable.
-- Tank 1 does not require visibly impossible articulation and has reliable trigger margin.
+- Tank 1's distributed special-reach pose does not visibly overstretch/intersect the Arm-3 linkage, hoses, or tank structure.
+- Tank 1 has reliable fill-trigger margin at the approximately Z +1.900 m discharge position.
+- Each selector stop fills only its intended tank.
 - All four tanks accept crop-specific Realistic Seeder seed and fertilizer.
 - No cross-compartment heap bleed materially misrepresents tank boundaries.
 - Attached drill finds and consumes all supported products correctly.
 - Save/reload is stable.
+
+### If Tank 1 +1.900 m is insufficient
+
+Do not return to the V6 two-joint pose as the first response.
+
+The precomputed secondary distributed solution targets opening center Z +2.121 m:
+
+- Arm 1 = `+106.584529 deg`
+- Arm 2 = `-60.997442 deg`
+- Arm 3 = `-146.992740 deg`
+- Arm 4 = `+21 deg`
+
+Only move toward this center solution if runtime trigger or visual evidence shows that the recommended +1.900 m pose lacks adequate margin.
 
 ## Realistic Seeder compatibility test
 
@@ -114,6 +150,7 @@ Before calling a compatibility bridge release-ready:
 Record:
 
 - Build/version:
+- SHA-256:
 - Game version:
 - Dependency versions:
 - Cart:
