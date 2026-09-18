@@ -1,0 +1,463 @@
+{
+  "source": {
+    "archive": "FS25_Bourgault_Series_3320.zip",
+    "sha256": "30eebabb116e1932a53f25b78feb41c37fdda66260933d05c560302db5f9d69a",
+    "zipEntries": 60,
+    "author": "Hispano",
+    "version": "2.0.0.4",
+    "title": "Bourgault 3320-76 + 7950 Air Cart [4-Tank V3 F-R]",
+    "classification": "working V3 front-to-rear reference; not V6/V7 authority"
+  },
+  "fileHashes": {
+    "modDesc.xml": "1175b0acb52a119188169f5320e7fe68b7cee5856f99176e3f91d8be53120f9b",
+    "xml/Series_7950B.xml": "a58f8633ac5a7ae9e1f11bfb00f5beeeddadef89d619ced36494595c289d8213",
+    "i3d/Series_7950B.i3d": "71e848bfd4f963126107dd41e4764a1869d1f28d0e42c365cafd72cdb9d811d3"
+  },
+  "redistribution": "No explicit redistribution license/LICENSE file found; archive/model assets intentionally not committed to public repo.",
+  "coverStops": [
+    {
+      "openAnimation": "loadingPipe",
+      "openAnimationStopTime": "0",
+      "closeAnimation": "loadingPipe",
+      "closeAnimationStopTime": "1",
+      "fillUnitIndices": "1",
+      "openOnBuy": "false",
+      "autoReactToTrigger": "false"
+    },
+    {
+      "openAnimation": "loadingPipe",
+      "openAnimationStopTime": "0.104",
+      "fillUnitIndices": "2",
+      "openOnBuy": "false",
+      "autoReactToTrigger": "false"
+    },
+    {
+      "openAnimation": "loadingPipe",
+      "openAnimationStopTime": "0.257",
+      "fillUnitIndices": "3",
+      "openOnBuy": "false",
+      "autoReactToTrigger": "false"
+    },
+    {
+      "openAnimation": "loadingPipe",
+      "openAnimationStopTime": "0.469",
+      "fillUnitIndices": "4",
+      "openOnBuy": "false",
+      "autoReactToTrigger": "false"
+    }
+  ],
+  "loadingPipeParts": [
+    {
+      "node": "exactFillRootNodeTank1",
+      "startTime": "0.000",
+      "endTime": "0.400",
+      "startTrans": "-1.89549 2.74644 4.33058",
+      "endTrans": "-1.89549 12.74644 4.33058"
+    },
+    {
+      "node": "exactFillRootNodeTank2",
+      "startTime": "0.790",
+      "endTime": "0.940",
+      "startTrans": "-1.89549 12.74644 4.33058",
+      "endTrans": "-1.89549 2.74644 4.33058"
+    },
+    {
+      "node": "exactFillRootNodeTank2",
+      "startTime": "1.140",
+      "endTime": "1.290",
+      "startTrans": "-1.89549 2.74644 4.33058",
+      "endTrans": "-1.89549 12.74644 4.33058"
+    },
+    {
+      "node": "exactFillRootNodeTank3",
+      "startTime": "2.320",
+      "endTime": "2.470",
+      "startTrans": "-1.89549 12.74644 4.33058",
+      "endTrans": "-1.89549 2.74644 4.33058"
+    },
+    {
+      "node": "exactFillRootNodeTank3",
+      "startTime": "2.680",
+      "endTime": "2.830",
+      "startTrans": "-1.89549 2.74644 4.33058",
+      "endTrans": "-1.89549 12.74644 4.33058"
+    },
+    {
+      "node": "exactFillRootNodeTank4",
+      "startTime": "4.420",
+      "endTime": "4.570",
+      "startTrans": "-1.89549 12.74644 4.33058",
+      "endTrans": "-1.89549 2.74644 4.33058"
+    },
+    {
+      "node": "exactFillRootNodeTank4",
+      "startTime": "4.810",
+      "endTime": "4.960",
+      "startTrans": "-1.89549 2.74644 4.33058",
+      "endTrans": "-1.89549 12.74644 4.33058"
+    },
+    {
+      "node": "overloadingArm01",
+      "startTime": "0.0",
+      "endTime": "3.333",
+      "startRot": "0 100 0",
+      "endRot": "0 90 0"
+    },
+    {
+      "node": "overloadingArm01",
+      "startTime": "3.333",
+      "endTime": "9.999",
+      "startRot": "0 90 0",
+      "endRot": "0 0 0"
+    },
+    {
+      "node": "overloadingArm02",
+      "startTime": "0.0",
+      "endTime": "3.333",
+      "startRot": "0 -50 0",
+      "endRot": "0 -33 0"
+    },
+    {
+      "node": "overloadingArm02",
+      "startTime": "3.333",
+      "endTime": "6.666",
+      "startRot": "0 -33 0",
+      "endRot": "0 0 0"
+    },
+    {
+      "node": "overloadingArm02",
+      "startTime": "6.666",
+      "endTime": "9.999",
+      "startRot": "0 0 0",
+      "endRot": "0 0 0"
+    },
+    {
+      "node": "overloadingArm03",
+      "startTime": "0.0",
+      "endTime": "3.333",
+      "startRot": "0 -135 0",
+      "endRot": "0 -135 0"
+    },
+    {
+      "node": "overloadingArm03",
+      "startTime": "3.333",
+      "endTime": "6.666",
+      "startRot": "0 -135 0",
+      "endRot": "0 -64 0"
+    },
+    {
+      "node": "overloadingArm03",
+      "startTime": "6.666",
+      "endTime": "9.999",
+      "startRot": "0 -64 0",
+      "endRot": "0 0 0"
+    },
+    {
+      "node": "overloadingArm04",
+      "startTime": "3.333",
+      "endTime": "9.999",
+      "startRot": "21 0 0",
+      "endRot": "0 0 0"
+    },
+    {
+      "node": "overloadingArm04",
+      "startTime": "6.666",
+      "endTime": "9.6",
+      "startTrans": "0 0.28 -0.074",
+      "endTrans": "0 0.611 -0.005"
+    },
+    {
+      "node": "overloadingArm04",
+      "startTime": "9.6",
+      "endTime": "9.999",
+      "startTrans": "0 0.611 -0.005",
+      "endTrans": "0 0.418 -0.045"
+    },
+    {
+      "node": "tankFlapsBack",
+      "startTime": "5.333",
+      "endTime": "6.666",
+      "startRot": "0 0 -100",
+      "endRot": "0 0 0"
+    },
+    {
+      "node": "tankFlapsFront",
+      "startTime": "2.5",
+      "endTime": "3.333",
+      "startRot": "0 0 -100",
+      "endRot": "0 0 0"
+    }
+  ],
+  "relevantNodes": {
+    "overloadingArm01": {
+      "mapping": "0>0|6|0",
+      "scenePath": "0|0|6|0",
+      "name": "overloadingArm01",
+      "tag": "TransformGroup",
+      "translation": "-1.47003 1.56863 -1.22386"
+    },
+    "overloadingArm02": {
+      "mapping": "0>0|6|0|0",
+      "scenePath": "0|0|6|0|0",
+      "name": "overloadingArm02",
+      "tag": "TransformGroup",
+      "translation": "-0.173656 0.727869 -3.68031"
+    },
+    "overloadingArm03": {
+      "mapping": "0>0|6|0|0|0",
+      "scenePath": "0|0|6|0|0|0",
+      "name": "overloadingArm03",
+      "tag": "TransformGroup",
+      "translation": "-0.241337 0.219075 1.66861"
+    },
+    "overloadingArm04": {
+      "mapping": "0>0|6|0|0|0|0",
+      "scenePath": "0|0|6|0|0|0|0",
+      "name": "overloadingArm04",
+      "tag": "TransformGroup",
+      "translation": "-0 0.418 -0.045"
+    },
+    "tankFlapsBack": {
+      "mapping": "0>0|6|2",
+      "scenePath": "0|0|6|2",
+      "name": "tankFlapsBack",
+      "tag": "TransformGroup",
+      "translation": "0.290033 3.65974 -3.0748"
+    },
+    "tankFlapsFront": {
+      "mapping": "0>0|6|3",
+      "scenePath": "0|0|6|3",
+      "name": "tankFlapsFront",
+      "tag": "TransformGroup",
+      "translation": "0.288998 3.65987 1.25231"
+    },
+    "exactFillRootNodeTank1": {
+      "mapping": "0>0|6|0|0|0|0|6|1",
+      "scenePath": "0|0|6|0|0|0|0|6|1",
+      "name": "exactFillRootNodeTank1",
+      "tag": "Shape",
+      "translation": "-1.89549 2.74644 4.33058",
+      "rotation": "-17.9343 0 0",
+      "visibility": "false"
+    },
+    "exactFillRootNodeTank2": {
+      "mapping": "0>0|6|0|0|0|0|6|3",
+      "scenePath": "0|0|6|0|0|0|0|6|3",
+      "name": "exactFillRootNodeTank2",
+      "tag": "Shape",
+      "translation": "-1.89549 12.74644 4.33058",
+      "rotation": "-17.9343 0 0",
+      "visibility": "false"
+    },
+    "exactFillRootNodeTank3": {
+      "mapping": "0>0|6|0|0|0|0|6|2",
+      "scenePath": "0|0|6|0|0|0|0|6|2",
+      "name": "exactFillRootNodeTank3",
+      "tag": "Shape",
+      "translation": "-1.89549 12.74644 4.33058",
+      "rotation": "-17.9343 0 0",
+      "visibility": "false"
+    },
+    "exactFillRootNodeTank4": {
+      "mapping": "0>0|6|0|0|0|0|6|0",
+      "scenePath": "0|0|6|0|0|0|0|6|0",
+      "name": "exactFillRootNodeTank4",
+      "tag": "Shape",
+      "translation": "-1.89549 12.74644 4.33058",
+      "rotation": "-17.9343 0 0",
+      "visibility": "false"
+    },
+    "effects": {
+      "mapping": "0>0|6|0|0|0|0|5",
+      "scenePath": "0|0|6|0|0|0|0|5",
+      "name": "effects",
+      "tag": "TransformGroup"
+    },
+    "conveyorEffect": {
+      "mapping": "0>0|6|0|0|0|0|5|0",
+      "scenePath": "0|0|6|0|0|0|0|5|0",
+      "name": "conveyorEffect",
+      "tag": "Shape",
+      "translation": "0.00383 -0.226519 7.13227",
+      "rotation": "2.84426 0 0"
+    },
+    "pipeEffect": {
+      "mapping": "0>0|6|0|0|0|0|5|2",
+      "scenePath": "0|0|6|0|0|0|0|5|2",
+      "name": "pipeEffect",
+      "tag": "Shape",
+      "translation": "-0.00384 -0.258395 -4.10928",
+      "rotation": "-38.4184 65.9399 -129.594"
+    },
+    "conveyorBelts": {
+      "mapping": "0>0|6|0|0|0|0|2",
+      "scenePath": "0|0|6|0|0|0|0|2",
+      "name": "conveyorBelts",
+      "tag": "Shape",
+      "translation": "1.88502 -0.783007 3.28103"
+    },
+    "overloadingArm01Hydraulic": {
+      "mapping": "0>0|6|1",
+      "scenePath": "0|0|6|1",
+      "name": "overloadingArm01Hydraulic",
+      "tag": "TransformGroup",
+      "translation": "-0.971211 1.46645 -2.04846",
+      "rotation": "-0.075259 -33.8778 0"
+    },
+    "overloadingArm02Hydraulic": {
+      "mapping": "0>0|6|0|1",
+      "scenePath": "0|0|6|0|1",
+      "name": "overloadingArm02Hydraulic",
+      "tag": "TransformGroup",
+      "translation": "-0.126765 0.929425 -2.72392",
+      "rotation": "0 185.59 0"
+    },
+    "overloadingArm03Hydraulic": {
+      "mapping": "0>0|6|0|0|0|1",
+      "scenePath": "0|0|6|0|0|0|1",
+      "name": "overloadingArm03Hydraulic",
+      "tag": "TransformGroup",
+      "translation": "-0 -0.064599 0.16088",
+      "rotation": "-68.341 1.2e-05 0"
+    },
+    "overloadingArm01HydraulicRef": {
+      "mapping": "0>0|6|0|2",
+      "scenePath": "0|0|6|0|2",
+      "name": "overloadingArm01HydraulicRef",
+      "tag": "TransformGroup",
+      "translation": "0.094832 -0.101224 -0.222905",
+      "rotation": "-0.075259 -33.8778 0"
+    },
+    "overloadingArm02HydraulicRef": {
+      "mapping": "0>0|6|0|0|1",
+      "scenePath": "0|0|6|0|0|1",
+      "name": "overloadingArm02HydraulicRef",
+      "tag": "TransformGroup",
+      "translation": "-0.023452 0.201557 0.237692",
+      "rotation": "0 185.59 0"
+    },
+    "overloadingArm03HydraulicRef": {
+      "mapping": "0>0|6|0|0|0|0|1",
+      "scenePath": "0|0|6|0|0|0|0|1",
+      "name": "overloadingArm03HydraulicRef",
+      "tag": "TransformGroup",
+      "translation": "0 0.443858 0.574153",
+      "rotation": "-68.341 1.2e-05 0"
+    },
+    "fillVolumeTank1": {
+      "mapping": "0>0|4|1",
+      "scenePath": "0|0|4|1",
+      "name": "fillVolumeTank1",
+      "tag": "Shape",
+      "translation": "0.028885 2.765 1.478089",
+      "scale": "0.96 0.98 0.585"
+    },
+    "fillVolumeTank2": {
+      "mapping": "0>0|4|8",
+      "scenePath": "0|0|4|8",
+      "name": "fillVolumeTank2",
+      "tag": "Shape",
+      "translation": "0.028885 2.765 0.198845",
+      "scale": "0.96 0.98 0.116"
+    },
+    "fillVolumeTank3": {
+      "mapping": "0>0|4|7",
+      "scenePath": "0|0|4|7",
+      "name": "fillVolumeTank3",
+      "tag": "Shape",
+      "translation": "0.028885 2.765 -0.479542",
+      "scale": "0.96 0.98 0.255"
+    },
+    "fillVolumeTank4": {
+      "mapping": "0>0|4|0",
+      "scenePath": "0|0|4|0",
+      "name": "fillVolumeTank4",
+      "tag": "Shape",
+      "translation": "0.028885 2.77602 -2.88297"
+    },
+    "loadInfoSeeds": {
+      "mapping": "0>0|4|3",
+      "scenePath": "0|0|4|3",
+      "name": "loadInfoSeeds",
+      "tag": "TransformGroup",
+      "translation": "0 3.68986 -0.816147"
+    },
+    "unloadInfoSeeds": {
+      "mapping": "0>0|4|2",
+      "scenePath": "0|0|4|2",
+      "name": "unloadInfoSeeds",
+      "tag": "TransformGroup",
+      "translation": "0 3.68986 -3.5273"
+    },
+    "loadInfoFertilizer": {
+      "mapping": "0>0|4|4",
+      "scenePath": "0|0|4|4",
+      "name": "loadInfoFertilizer",
+      "tag": "TransformGroup",
+      "translation": "0 3.68986 0.654825"
+    },
+    "unloadInfoFertilizer": {
+      "mapping": "0>0|4|5",
+      "scenePath": "0|0|4|5",
+      "name": "unloadInfoFertilizer",
+      "tag": "TransformGroup",
+      "translation": "0 3.68986 2.08645"
+    }
+  },
+  "fillUnits": [
+    {
+      "index": 1,
+      "fillTypes": "seeds fertilizer",
+      "capacity": "9691",
+      "exactFillRootNode": "exactFillRootNodeTank1"
+    },
+    {
+      "index": 2,
+      "fillTypes": "seeds fertilizer",
+      "capacity": "1938",
+      "exactFillRootNode": "exactFillRootNodeTank2"
+    },
+    {
+      "index": 3,
+      "fillTypes": "seeds fertilizer",
+      "capacity": "4228",
+      "exactFillRootNode": "exactFillRootNodeTank3"
+    },
+    {
+      "index": 4,
+      "fillTypes": "seeds fertilizer",
+      "capacity": "17618",
+      "exactFillRootNode": "exactFillRootNodeTank4"
+    }
+  ],
+  "fillVolumes": [
+    {
+      "node": "fillVolumeTank1",
+      "fillUnitIndex": "1",
+      "maxDelta": "0.05",
+      "maxAllowedHeapAngle": "12",
+      "retessellateTop": "true"
+    },
+    {
+      "node": "fillVolumeTank2",
+      "fillUnitIndex": "2",
+      "maxDelta": "0.05",
+      "maxAllowedHeapAngle": "12",
+      "retessellateTop": "true"
+    },
+    {
+      "node": "fillVolumeTank3",
+      "fillUnitIndex": "3",
+      "maxDelta": "0.05",
+      "maxAllowedHeapAngle": "12",
+      "retessellateTop": "true"
+    },
+    {
+      "node": "fillVolumeTank4",
+      "fillUnitIndex": "4",
+      "maxDelta": "0.05",
+      "maxAllowedHeapAngle": "12",
+      "retessellateTop": "true"
+    }
+  ]
+}
