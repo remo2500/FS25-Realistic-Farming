@@ -48,7 +48,7 @@ See [`docs/CURRENT_AUTHORITY.md`](docs/CURRENT_AUTHORITY.md) for the full geomet
 
 ### Seed Hawk 660
 
-Active test candidate: **3-Tank RS V3 — TEST READY / runtime validation pending**.
+Active test candidate: **3-Tank RS V3R1 Recovery — TEST READY / runtime validation pending**.
 
 Architecture:
 
