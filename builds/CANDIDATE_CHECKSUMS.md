@@ -1,6 +1,6 @@
 # Candidate Build Checksums
 
-_Last updated: 2026-09-16_
+_Last updated: 2026-09-18_
 
 Candidate ZIPs are intentionally not stored in this public repository. These checksums identify exact locally generated or user-supplied test/reference archives associated with the authority documents.
 
@@ -9,7 +9,7 @@ Candidate ZIPs are intentionally not stored in this public repository. These che
 | **Bourgault 3320 / 7950B V7 Engineering** | `190b358ed1f21b411a11eb2d4cd0fc1d59f6f6cd293f93f9e7e239b307a17e2d` | 61 | **30/30 donor-aware static engineering checks PASS; TEST READY for first runtime review** |
 | Bourgault 3320 / 7950B V6 Engineering | `6072d0f1e805a684bd926aa97fcbcca3d5b7ef5f9429d92c3697d59b26289651` | 62 | 18/18 PASS under historical V6 profile; **HOLD after geometry audit** |
 | Bourgault 3320 / 7950B uploaded 4-Tank V3 F-R reference | `30eebabb116e1932a53f25b78feb41c37fdda66260933d05c560302db5f9d69a` | 60 | donor-derived reference captured 2026-09-16; engineering extract stored under `equipment/bourgault_7950/reference/`; **not V7 authority** |
-| Seed Hawk 660 3-Tank RS V3 | `d052c302f3a54d0a77273dc02098185223094ca6e7971b5236eb114684edadcb` | 56 | 16/16 PASS |
+| **Seed Hawk 660 3-Tank RS V3R1 Recovery** | `ffc66a36e95815dcdde54973c02db6dcf28e7d0621b29b96bbc2b3f33b968a14` | 56 | **21/21 recovery static checks PASS; TEST READY** |\n| Seed Hawk 660 3-Tank RS V3 (historical exact archive) | `d052c302f3a54d0a77273dc02098185223094ca6e7971b5236eb114684edadcb` | 56 | 16/16 PASS; exact historical bytes currently unavailable |
 | Seed Hawk 660 3-Tank RS V2 (superseded test) | `3dcadef65f65add03d000503f6c3b457eb1d8d88875ea5fab9d9d1b61b4a4594` | 56 | superseded by V3 cleanup |
 
 Entry-count detail for the current archives:
@@ -17,7 +17,7 @@ Entry-count detail for the current archives:
 - Bourgault V7: **61 ZIP entries**.
 - Bourgault V6: **57 regular files + 5 directory entries = 62 ZIP entries**.
 - Uploaded Bourgault V3 reference: **60 ZIP entries**.
-- Seed Hawk V3: **52 regular files + 4 directory entries = 56 ZIP entries**.
+- Seed Hawk V3R1 Recovery: **52 regular files + 4 directory entries = 56 ZIP entries**.\n- Historical Seed Hawk V3: **52 regular files + 4 directory entries = 56 ZIP entries**.
 
 ## Bourgault V7 provenance and reproducibility
 
@@ -39,6 +39,22 @@ The 30/30 donor-aware static pass covers archive/XML integrity, capacities/categ
 
 The uploaded Bourgault V3 archive identifies the author as **Hispano** and contains no explicit redistribution license. The full V3/V7 donor-derived archives are therefore not committed to this public repository; only hashes, rebuild instructions, project-authored scripts, and donor-safe derived engineering reference data are stored.
 
+## Seed Hawk V3R1 recovery provenance and reproducibility
+
+The user supplied recovery base `FS25_SeedHawkPack.zip` with SHA-256:
+
+`c248f1ec41a0c1ae5645f2fa4b61c925653ba3c5e056724a0f1be072f4460ce8`
+
+The base already contains the accepted three-compartment physical architecture and conveyor selector geometry. The recovery builder applies the V3 category/sprayer/compatibility cleanup without redistributing donor assets:
+
+`tools/build_seedhawk_v3r1_from_recovery_base.py`
+
+Two independent rebuilds from the verified source and current project compatibility script produced byte-identical V3R1 Recovery archives with SHA-256:
+
+`ffc66a36e95815dcdde54973c02db6dcf28e7d0621b29b96bbc2b3f33b968a14`
+
+The historical V3 checksum remains recorded separately. V3R1 is intentionally a new version label because the historical archive bytes are unavailable and project policy forbids silently replacing a distributed candidate under the same identity.
+
 ## Verification
 
 Windows PowerShell:
@@ -56,7 +72,7 @@ Linux/macOS:
 sha256sum FS25_Bourgault_3320_4Tank_V7_Engineering.zip
 sha256sum FS25_Bourgault_3320_4Tank_V6_Engineering.zip
 sha256sum FS25_Bourgault_Series_3320.zip
-sha256sum FS25_SeedHawkPack_3Tank_RS_V3.zip
+sha256sum FS25_SeedHawkPack_3Tank_RS_V3R1_Recovery.zip\nsha256sum FS25_SeedHawkPack_3Tank_RS_V3.zip
 ```
 
 The checksum only identifies an archive. A matching checksum and a static validator pass do not replace the engineering and in-game promotion tests in `docs/TESTING.md`.
