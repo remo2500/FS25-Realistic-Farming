@@ -1,12 +1,12 @@
 # Seed Hawk 660 Three-Tank Patch Specification
 
-_Current authority target: 3-Tank RS V3_
+_Current authority target: 3-Tank RS V3R1 Recovery_
 
 This file documents the project-authored changes used to make the Seed Hawk 660 cart expose all three donor compartments consistently to normal seed/fertilizer products and Realistic Seeder crop-specific seed products.
 
 ## Donor files modified
 
-Current V3 intentionally modifies:
+Current V3R1 Recovery intentionally modifies:
 
 - `modDesc.xml`
 - `seedHawk660AirCart.xml`
@@ -68,7 +68,7 @@ Tank 2 uses the added middle exact-fill root rather than sharing Tank 1 or Tank 
 
 ## Cart-level sprayer element
 
-V3 cleanup authority:
+V3R1 cleanup authority:
 
 ```xml
 <sprayer fillUnitIndex="3" unloadInfoIndex="3">
@@ -86,7 +86,7 @@ The unsupported `loadInfoIndex` attribute present in V2 is removed. FS25's Spray
 4. Mirrors the resulting set across all three compartments.
 5. Raises `VehicleStateChange.FILLTYPE_CHANGE` when the supported set changes so attached sowing/sprayer tools rebuild their fill-source caches.
 
-V3 deliberately tightens the V2 fallback from broad substring matching to a suffix check. A future explicit Realistic Seeder allowlist may supersede this once the actual runtime registration set is captured.
+V3R1 retains the V3 hardening that tightens the V2 fallback from broad substring matching to a suffix check. A future explicit Realistic Seeder allowlist may supersede this once the actual runtime registration set is captured.
 
 ## Mechanical authority
 
@@ -100,11 +100,11 @@ Run:
 python tools/validate_candidate.py FS25_SeedHawkPack_3Tank_RS_V3.zip --profile seedhawk660-v3
 ```
 
-Current expected result: **16/16 checks PASS**.
+Historical V3 validator expectation remains **16/16 PASS**. The recovered V3R1 candidate additionally passed five recovery-specific checks for script registration, recovery identity, three-volume mapping, No Conveyor coverage, and required I3D nodes: **21/21 PASS**.
 
 ## Runtime promotion blockers
 
-Before V3 can be promoted:
+Before V3R1 can be promoted:
 
 - Load the same known Realistic Seeder crop-specific seed into Tanks 1, 2, and 3 independently.
 - Confirm the conveyor selects the intended compartment at all three stops.
@@ -113,3 +113,26 @@ Before V3 can be promoted:
 - Confirm normal seed and fertilizer behavior remains intact.
 - Save/reload with different products in each tank.
 - Confirm multiplayer if multiplayer support is required.
+
+
+## Recovery provenance
+
+The user-supplied recovery base is `FS25_SeedHawkPack.zip`, SHA-256:
+
+`c248f1ec41a0c1ae5645f2fa4b61c925653ba3c5e056724a0f1be072f4460ce8`
+
+It already contains the accepted three-compartment I3D/XML architecture. The donor-safe reference is:
+
+`equipment/seedhawk_660/reference/RECOVERY_BASE.md`
+
+Rebuild with:
+
+```bash
+python tools/build_seedhawk_v3r1_from_recovery_base.py FS25_SeedHawkPack.zip FS25_SeedHawkPack_3Tank_RS_V3R1_Recovery.zip
+```
+
+Current recovered candidate SHA-256:
+
+`ffc66a36e95815dcdde54973c02db6dcf28e7d0621b29b96bbc2b3f33b968a14`
+
+The historical V3 checksum remains separately recorded. Do not overwrite or relabel V3R1 as the historical V3 because the exact historical archive bytes are unavailable.
