@@ -109,7 +109,7 @@ def main() -> int:
     parser.add_argument(
         "--compat-script",
         type=Path,
-        default=Path("scripts/compatibility/SeedHawk660ThreeTankCompat.lua"),
+        default=Path("scripts/compatibility/archive/SeedHawk660ThreeTankCompat_V3R1.lua"),
     )
     parser.add_argument("--allow-unknown-source", action="store_true")
     args = parser.parse_args()
