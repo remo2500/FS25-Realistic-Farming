@@ -1,5 +1,9 @@
 -- Seed Hawk 660 three-tank Realistic Seeder/custom seed compatibility bridge.
--- Keeps Tanks 1-3 synchronized even when an external seeding mod patches only one donor unit.
+-- V3R2 seed-acceptance hotfix.
+--
+-- Base SEEDS/FERTILIZER remain explicit in vehicle XML so the cart stays
+-- fillable even if this compatibility bridge or an external category extension
+-- is unavailable. Lua expands the supported set; it is not sole base authority.
 
 SeedHawk660ThreeTankCompat = {}
 SeedHawk660ThreeTankCompat.scanTimer = 0
@@ -18,12 +22,28 @@ local function isTargetSeedHawk660(vehicle)
     return string.find(configName, "seedhawk660aircart.xml", 1, true) ~= nil
 end
 
-local function addSet(dst, src)
+-- GIANTS manager helpers return array-style lists of fillType indices, while
+-- FillUnit.supportedFillTypes is a set keyed by fillTypeIndex. Accept both forms.
+local function addFillTypeCollection(dst, src)
     if src == nil then return end
-    for fillTypeIndex, enabled in pairs(src) do
-        if enabled then
-            dst[fillTypeIndex] = true
+
+    for key, value in pairs(src) do
+        if type(value) == "number" then
+            dst[value] = true
+        elseif value == true and type(key) == "number" then
+            dst[key] = true
         end
+    end
+end
+
+local function addNamedFillType(dst, name)
+    if g_fillTypeManager == nil or g_fillTypeManager.nameToIndex == nil then
+        return
+    end
+
+    local fillTypeIndex = g_fillTypeManager.nameToIndex[string.upper(name)]
+    if fillTypeIndex ~= nil then
+        dst[fillTypeIndex] = true
     end
 end
 
@@ -31,24 +51,31 @@ local function getDesiredFillTypes(vehicle)
     local desired = {}
     local units = vehicle.spec_fillUnit.fillUnits
 
-    -- Preserve anything another mod has already added to any one of the three tanks.
+    -- Preserve every type already supported by any of the three tanks.
+    -- V3R2 XML guarantees generic SEEDS and FERTILIZER are present before Lua runs.
     for i = 1, 3 do
         local unit = units[i]
         if unit ~= nil then
-            addSet(desired, unit.supportedFillTypes)
+            addFillTypeCollection(desired, unit.supportedFillTypes)
         end
     end
 
     if g_fillTypeManager ~= nil then
-        -- Include the normal and mod-extended seed/fertilizer categories.
-        if g_fillTypeManager.getFillTypesByCategoryNames ~= nil then
-            addSet(desired, g_fillTypeManager:getFillTypesByCategoryNames("seeds fertilizer"))
+        -- Direct fill-type lookup for the two generic base inputs.
+        if g_fillTypeManager.getFillTypesByNames ~= nil then
+            addFillTypeCollection(desired, g_fillTypeManager:getFillTypesByNames("seeds fertilizer"))
+        else
+            addNamedFillType(desired, "SEEDS")
+            addNamedFillType(desired, "FERTILIZER")
         end
 
-        -- Compatibility fallback for Realistic Seeder/multifruit seed products that
-        -- are not added to the normal seeds category. Accept only names that actually
-        -- end in SEED (for example GREENBEAN_SEED or WHEATSEED), rather than any name
-        -- containing the letters SEED somewhere in the middle.
+        -- Include custom dry fertilizer products registered in the native
+        -- FERTILIZER category. This is supplemental, not base input authority.
+        if g_fillTypeManager.getFillTypesByCategoryNames ~= nil then
+            addFillTypeCollection(desired, g_fillTypeManager:getFillTypesByCategoryNames("fertilizer"))
+        end
+
+        -- Realistic Seeder / multifruit fallback for standalone crop seed types.
         if g_fillTypeManager.nameToIndex ~= nil then
             for name, fillTypeIndex in pairs(g_fillTypeManager.nameToIndex) do
                 local upperName = string.upper(tostring(name))
@@ -86,15 +113,14 @@ local function synchronizeVehicle(vehicle)
     end
 
     if changed then
-        -- SowingMachine/Sprayer rebuild attached source lists from this state change.
         local root = vehicle.rootVehicle or vehicle
         if root ~= nil and root.raiseStateChange ~= nil and VehicleStateChange ~= nil then
             root:raiseStateChange(VehicleStateChange.FILLTYPE_CHANGE)
         end
 
-        Logging.info("[SeedHawk660-3Tank RS V3] Synchronized Tanks 1-3 to %d supported fill types and refreshed source caches", count)
+        Logging.info("[SeedHawk660-3Tank RS V3R2] Synchronized Tanks 1-3 to %d supported fill types and refreshed source caches", count)
     elseif not vehicle.seedHawk660ThreeTankCompatLogged then
-        Logging.info("[SeedHawk660-3Tank RS V3] Tanks 1-3 already synchronized (%d supported fill types)", count)
+        Logging.info("[SeedHawk660-3Tank RS V3R2] Tanks 1-3 already synchronized (%d supported fill types)", count)
     end
 
     vehicle.seedHawk660ThreeTankCompatLogged = true
