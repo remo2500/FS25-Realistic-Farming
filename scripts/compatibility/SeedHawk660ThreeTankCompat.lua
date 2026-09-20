@@ -1,9 +1,10 @@
 -- Seed Hawk 660 three-tank Realistic Seeder/custom seed compatibility bridge.
 -- V3R2 seed-acceptance hotfix.
 --
--- Base SEEDS/FERTILIZER remain explicit in vehicle XML so the cart stays
--- fillable even if this compatibility bridge or an external category extension
--- is unavailable. Lua expands the supported set; it is not sole base authority.
+-- Key rule: the vehicle XML itself keeps explicit base-game fillTypes
+-- (SEEDS and FERTILIZER) so the cart is fillable even if this compatibility
+-- bridge or an external category extension is unavailable. Lua only expands
+-- the supported set; it does not provide the sole authority for base inputs.
 
 SeedHawk660ThreeTankCompat = {}
 SeedHawk660ThreeTankCompat.scanTimer = 0
@@ -22,8 +23,9 @@ local function isTargetSeedHawk660(vehicle)
     return string.find(configName, "seedhawk660aircart.xml", 1, true) ~= nil
 end
 
--- GIANTS manager helpers return array-style lists of fillType indices, while
--- FillUnit.supportedFillTypes is a set keyed by fillTypeIndex. Accept both forms.
+-- GIANTS manager helpers such as getFillTypesByNames/getFillTypesByCategoryNames
+-- return array-style lists (1 -> fillTypeIndex), while FillUnit.supportedFillTypes
+-- is a set keyed by fillTypeIndex (fillTypeIndex -> true). Accept both forms.
 local function addFillTypeCollection(dst, src)
     if src == nil then return end
 
@@ -51,8 +53,8 @@ local function getDesiredFillTypes(vehicle)
     local desired = {}
     local units = vehicle.spec_fillUnit.fillUnits
 
-    -- Preserve every type already supported by any of the three tanks.
-    -- V3R2 XML guarantees generic SEEDS and FERTILIZER are present before Lua runs.
+    -- Preserve every fill type already supported by any one of the three tanks.
+    -- With V3R2 XML this always includes base SEEDS and FERTILIZER before Lua runs.
     for i = 1, 3 do
         local unit = units[i]
         if unit ~= nil then
@@ -61,7 +63,8 @@ local function getDesiredFillTypes(vehicle)
     end
 
     if g_fillTypeManager ~= nil then
-        -- Direct fill-type lookup for the two generic base inputs.
+        -- Belt-and-suspenders base authority: direct fill-type lookup, not category lookup.
+        -- GIANTS treats SEEDS/FERTILIZER as fill-type names in the donor XML.
         if g_fillTypeManager.getFillTypesByNames ~= nil then
             addFillTypeCollection(desired, g_fillTypeManager:getFillTypesByNames("seeds fertilizer"))
         else
@@ -69,13 +72,14 @@ local function getDesiredFillTypes(vehicle)
             addNamedFillType(desired, "FERTILIZER")
         end
 
-        -- Include custom dry fertilizer products registered in the native
-        -- FERTILIZER category. This is supplemental, not base input authority.
+        -- Preserve mod-extended dry fertilizer products when a FERTILIZER category exists.
+        -- This is deliberately separate from base SEEDS/FERTILIZER authority.
         if g_fillTypeManager.getFillTypesByCategoryNames ~= nil then
             addFillTypeCollection(desired, g_fillTypeManager:getFillTypesByCategoryNames("fertilizer"))
         end
 
-        -- Realistic Seeder / multifruit fallback for standalone crop seed types.
+        -- Compatibility fallback for Realistic Seeder / multifruit seed products that
+        -- register as standalone fill types rather than joining a shared category.
         if g_fillTypeManager.nameToIndex ~= nil then
             for name, fillTypeIndex in pairs(g_fillTypeManager.nameToIndex) do
                 local upperName = string.upper(tostring(name))
