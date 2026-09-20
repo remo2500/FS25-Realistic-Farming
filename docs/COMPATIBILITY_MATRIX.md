@@ -1,60 +1,81 @@
 # Compatibility Matrix
 
-_Last updated: 2026-09-15_
+_Last updated: 2026-09-20_
 
 This matrix tracks known compatibility status for the active FS25 Realistic Farming components.
 
 | Component | Base functionality | Realistic Seeder | Precision Farming | Save/reload | Multiplayer | Status |
 |---|---|---|---|---|---|---|
-| Seed Hawk 660 3-Tank RS V3 | PASS structurally | TESTING | No known conflict | TESTING | Not yet tested | TESTING |
-| Bourgault 7950B V6 Engineering | PASS structurally | TESTING | No known conflict | TESTING | Not yet tested | TESTING |
+| **Seed Hawk 660 3-Tank RS V3R2 Seed Fix** | **26/26 seed-fix checks PASS** | Runtime retest required | No known conflict | Runtime pending | Not yet tested | **TEST READY** |
+| Bourgault 7950B V6 Engineering | PASS structurally except flap timing | Matcher works structurally but over-broad | No known conflict | Not promoted | Not tested | **HOLD** |
+| **Bourgault 7950B V7 Engineering** | **30/30 donor-aware static checks PASS** | Hardened category + suffix fallback; runtime pending | No known conflict | Runtime pending | Not yet tested | **TEST READY** |
 | Bourgault 71300 | Not started | Planned | Planned | Planned | Planned | ROADMAP |
-| Shared Realistic Seeder compatibility layer | Equipment-specific prototypes work structurally | ACTIVE | N/A | TESTING | Not yet tested | ACTIVE |
+| Shared Realistic Seeder compatibility layer | Equipment-specific prototypes | ACTIVE | N/A | TESTING | Not yet tested | ACTIVE |
 | ProBox crop-specific packaging | Not started | Planned | N/A | Planned | Planned | ROADMAP |
 
-## Seed Hawk 660 notes
+## Seed Hawk 660 V3R2 Seed Fix notes
 
 - Three donor compartments retained: 5,600 / 5,600 / 10,600 L.
-- All three tanks use the same seed/fertilizer category architecture.
-- Realistic Seeder synchronization is intended to make Tanks 1 and 2 behave like Tank 3.
-- V3 removes the unsupported cart-level sprayer `loadInfoIndex` attribute found during the V2 audit.
-- V3 tightens custom-seed fallback matching to fill-type names ending in `SEED`, excluding the generic `SEEDS` name.
-- Current V3 candidate passes 16/16 project static validation checks.
+- All three tanks use explicit donor-proven `fillTypes="seeds fertilizer"`; V3R1's category substitution is prohibited.
+- V3R2 preserves the union of types already present on the three donor units, important because Tank 3 was previously observed accepting crop-specific products that Tanks 1 and 2 missed.
+- V3R2 removes the unsupported cart-level sprayer `loadInfoIndex` attribute.
+- V3R2 retains the `SEED` suffix fallback, explicitly resolves generic base fill types by name, and fixes GIANTS list/set table handling.
+- V3R1's 21/21 static PASS is superseded by runtime evidence: generic seed was rejected by all three tanks. V3R2 passes 26/26 seed-fix checks and requires runtime retest.
+- Runtime test coverage must include both Conveyor and No Conveyor configurations plus major cart/drill attachment arrangements.
 
-## Bourgault 7950B notes
+## Bourgault 7950B V6 notes
 
 - Four logical tanks front-to-back: 9,691 / 1,938 / 4,228 / 17,618 L.
 - Tank 4 represents factory Tank 1A + FLEX as one logical unit.
-- Tanks 1-3 use separate physical fill-volume envelopes.
-- Tank 4 uses two physical fill-volume regions with an 82/18 capacity split.
-- Tank 1 conveyor reach remains the major mechanical item requiring runtime proof.
-- Current V6 candidate passes 18/18 project static validation checks.
+- Static fill-volume segmentation is high confidence.
+- V6 Tank 1 conveyor reach concentrated excessive articulation in the first two primary joints.
+- V6 passes its historical 18/18 static checks, but those checks did not verify physical flap assignment.
+- Deeper geometry audit proved Tank 3 belongs to `tankFlapsBack`; V6 leaves that group closed at the 0.400 Tank 3 selector stop. V6 is therefore HOLD despite the historical validator pass.
+
+## Bourgault 7950B V7 notes
+
+Current candidate:
+
+`FS25_Bourgault_3320_4Tank_V7_Engineering.zip`
+
+SHA-256:
+
+`190b358ed1f21b411a11eb2d4cd0fc1d59f6f6cd293f93f9e7e239b307a17e2d`
+
+- Candidate is rebuilt from the verified user-supplied Hispano V3 donor archive using `tools/build_bourgault_v7_from_v3.py`; donor assets themselves are not committed publicly.
+- Two independent rebuilds from the same source and project Lua produced byte-identical V7 archives.
+- Donor-aware static engineering audit passes **30/30** checks.
+- Required flap relationship is implemented: Tanks 1-2 front group; Tanks 3-4 rear group.
+- At Tank 3 / 0.400, rear flap evaluates fully open and front flap fully closed.
+- Exact-fill-root activation is exclusive at all four selector stops.
+- Tank 1 uses the distributed special-reach pose targeting pipe Z approximately +1.900 m rather than V6's concentrated two-joint overtravel.
+- Tank 2 and Tank 3 remain close to directly recovered donor states.
+- Compatibility bridge no longer accepts arbitrary products merely because one tank already supports them.
+- Primary product authority is the `seeds fertilizer` categories, including products correctly appended to those categories by other mods.
+- Crop-specific standalone seed products use the narrower `ends in SEED` fallback until explicit Realistic Seeder registration data is captured.
+- The V7 validator now samples the actual flap animation and reconstructs Tank 1 pipe kinematics rather than treating node presence as proof.
+- Remaining work is runtime validation: visual linkage/hoses/collision, fill-trigger behavior, product heaps, drill consumption, save/reload, and multiplayer.
 
 ## Realistic Seeder notes
 
-Current project compatibility logic:
+Current intended flow:
 
-1. Uses normal `seeds fertilizer` fill type categories.
-2. Detects additional registered crop-specific seed fill types at runtime.
-3. Adds those fill types to every relevant compartment.
-4. Raises a fill-type state change so attached sowing/sprayer tools rebuild their source lists.
-
-Current matcher status:
-
-- Seed Hawk V3: suffix-based `SEED` heuristic.
-- Bourgault V6: broader `SEED` substring heuristic retained for candidate fidelity.
+1. Use normal `seeds fertilizer` categories.
+2. Detect additional registered crop-specific seed fill types when required.
+3. Add the intended set across all relevant compartments.
+4. Raise a fill-type state change so attached sowing/sprayer tools rebuild their source lists.
 
 Production hardening still required:
 
-- Replace heuristic matching with a verified allowlist or proven Realistic Seeder product mapping where practical.
-- Consolidate duplicated equipment-specific bridge logic after both carts pass runtime tests.
+- Replace heuristic seed-name matching with a verified allowlist/registration mapping where practical.
+- Consolidate equipment-specific bridge logic only after both carts pass runtime tests.
 - Reduce recurring polling if a reliable registration lifecycle hook is identified.
 - Confirm dedicated-server/client synchronization.
 
 ## Precision Farming policy
 
-Precision Farming remains the authority for soil and agronomy systems. Current air-cart changes only alter storage, loading, and product compatibility and are not intended to replace or duplicate Precision Farming behavior.
+Precision Farming remains the authority for soil and agronomy systems. Current air-cart changes alter storage, loading, and product compatibility only and are not intended to replace soil-state simulation.
 
 ## Version discipline
 
-When a game update or dependency update occurs, move the affected row back to **TESTING** until at least the minimum test suite in `TESTING.md` has been rerun.
+When a game update or dependency update occurs, move the affected row back to **TESTING** until the minimum protocol in `TESTING.md` has been rerun. A static validator pass never overrides a known physical or runtime defect.

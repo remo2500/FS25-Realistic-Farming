@@ -41,13 +41,18 @@ Every test archive should have a distinct candidate version. When a patch change
 
 Do not silently replace a previously distributed test ZIP with different contents under the same version name.
 
+Bourgault V6 is retained as a historical candidate and is on HOLD. V7 must be generated as a separate archive after applying the corrected flap animation and V7 compatibility bridge.
+
 ## Static validation
 
 Current profiles:
 
 ```bash
 python tools/validate_candidate.py <zip> --profile bourgault7950-v6
+python tools/validate_candidate.py <zip> --profile bourgault7950-v7
 python tools/validate_candidate.py <zip> --profile seedhawk660-v3
 ```
 
-Static validation confirms structural invariants only. In-game tests remain mandatory before promotion.
+The V6 profile exists for historical archive verification. The V7 profile adds compatibility hardening and load/unload-node position checks. Exact flap animation timing remains a separate mandatory engineering review until a robust I3D animation sampler is added.
+
+Static validation confirms only the invariants it actually checks. It never overrides a known geometry defect or replaces in-game tests.
