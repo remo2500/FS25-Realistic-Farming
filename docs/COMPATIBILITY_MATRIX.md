@@ -1,26 +1,26 @@
 # Compatibility Matrix
 
-_Last updated: 2026-09-16_
+_Last updated: 2026-09-20_
 
 This matrix tracks known compatibility status for the active FS25 Realistic Farming components.
 
 | Component | Base functionality | Realistic Seeder | Precision Farming | Save/reload | Multiplayer | Status |
 |---|---|---|---|---|---|---|
-| Seed Hawk 660 3-Tank RS V3R1 Recovery | PASS structurally; 21/21 recovery checks | TESTING / high confidence | No known conflict | TESTING | Not yet tested | **TEST READY** |
+| **Seed Hawk 660 3-Tank RS V3R2 Seed Fix** | **26/26 seed-fix checks PASS** | Runtime retest required | No known conflict | Runtime pending | Not yet tested | **TEST READY** |
 | Bourgault 7950B V6 Engineering | PASS structurally except flap timing | Matcher works structurally but over-broad | No known conflict | Not promoted | Not tested | **HOLD** |
 | **Bourgault 7950B V7 Engineering** | **30/30 donor-aware static checks PASS** | Hardened category + suffix fallback; runtime pending | No known conflict | Runtime pending | Not yet tested | **TEST READY** |
 | Bourgault 71300 | Not started | Planned | Planned | Planned | Planned | ROADMAP |
 | Shared Realistic Seeder compatibility layer | Equipment-specific prototypes | ACTIVE | N/A | TESTING | Not yet tested | ACTIVE |
 | ProBox crop-specific packaging | Not started | Planned | N/A | Planned | Planned | ROADMAP |
 
-## Seed Hawk 660 V3R1 Recovery notes
+## Seed Hawk 660 V3R2 Seed Fix notes
 
 - Three donor compartments retained: 5,600 / 5,600 / 10,600 L.
-- All three tanks use the same seed/fertilizer category architecture.
-- V3 preserves the union of types already present on the three donor units, important because Tank 3 was previously observed accepting the crop-specific products that Tanks 1 and 2 missed.
-- V3 removes the unsupported cart-level sprayer `loadInfoIndex` attribute found during the V2 audit.
-- V3 tightens custom-seed fallback matching to names ending in `SEED`, excluding generic `SEEDS`.
-- Historical V3 passed 16/16 project static validation checks; V3R1 Recovery passes those plus five recovery-specific checks for a 21/21 recovery audit.
+- All three tanks use explicit donor-proven `fillTypes="seeds fertilizer"`; V3R1's category substitution is prohibited.
+- V3R2 preserves the union of types already present on the three donor units, important because Tank 3 was previously observed accepting crop-specific products that Tanks 1 and 2 missed.
+- V3R2 removes the unsupported cart-level sprayer `loadInfoIndex` attribute.
+- V3R2 retains the `SEED` suffix fallback, explicitly resolves generic base fill types by name, and fixes GIANTS list/set table handling.
+- V3R1's 21/21 static PASS is superseded by runtime evidence: generic seed was rejected by all three tanks. V3R2 passes 26/26 seed-fix checks and requires runtime retest.
 - Runtime test coverage must include both Conveyor and No Conveyor configurations plus major cart/drill attachment arrangements.
 
 ## Bourgault 7950B V6 notes
