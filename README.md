@@ -48,17 +48,17 @@ See [`docs/CURRENT_AUTHORITY.md`](docs/CURRENT_AUTHORITY.md) for the full geomet
 
 ### Seed Hawk 660
 
-Active test candidate: **3-Tank RS V3R1 Recovery — TEST READY / runtime validation pending**.
+Active test candidate: **3-Tank RS V3R2 Seed Fix — TEST READY / runtime validation pending**.
 
 Architecture:
 
 - Three independent donor compartments retained.
 - 5,600 L / 5,600 L / 10,600 L.
 - Physical conveyor selection retained.
-- All three tanks support the same seed/fertilizer category logic.
+- All three tanks use direct donor-proven `SEEDS` / `FERTILIZER` fill-type authority.
 - Realistic Seeder crop-specific seed types are synchronized across all three tanks.
-- V3 removes the unsupported sprayer `loadInfoIndex` attribute and tightens the custom-seed matcher to fill-type names ending in `SEED`.
-- V3 is intentionally being held unchanged until runtime evidence is available.
+- V3R2 removes the unsupported sprayer `loadInfoIndex`, keeps the `SEED` suffix fallback for crop-specific products, and fixes list/set handling in the compatibility bridge.
+- V3R1 is superseded after runtime testing showed generic seed rejected by all three tanks. V3R2 restores explicit base seed/fertilizer support and is the only Seed Hawk build that should be tested now.
 
 ## Development assets
 
@@ -78,7 +78,7 @@ Bourgault engineering/rebuild assets:
 
 Other rebuild/validation authority:
 
-- [`equipment/seedhawk_660/PATCH_SPEC.md`](equipment/seedhawk_660/PATCH_SPEC.md)
+- [`equipment/seedhawk_660/PATCH_SPEC.md`](equipment/seedhawk_660/PATCH_SPEC.md)\n- [`tools/build_seedhawk_v3r2_seedfix.py`](tools/build_seedhawk_v3r2_seedfix.py)
 - [`patches/README.md`](patches/README.md)
 - [`tools/validate_candidate.py`](tools/validate_candidate.py)
 - [`builds/CANDIDATE_CHECKSUMS.md`](builds/CANDIDATE_CHECKSUMS.md)
