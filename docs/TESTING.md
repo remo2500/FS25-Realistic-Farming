@@ -13,7 +13,7 @@ Use this protocol before promoting any air-cart build from TESTING to approved/L
 - Where possible, use clearly different products in adjacent tanks so visual bleed is obvious.
 - Do not use an old purchased development cart as proof of a changed fill-unit architecture.
 
-## Seed Hawk 660 — required test
+## Seed Hawk 660 V3R2 — required test
 
 1. Purchase a fresh Seed Hawk cart with the **Conveyor** configuration.
 2. Confirm normal initial conveyor/transport state.
@@ -29,7 +29,7 @@ Use this protocol before promoting any air-cart build from TESTING to approved/L
 
 ### Seed Hawk pass criteria
 
-- All three tanks accept the same crop-specific Realistic Seeder seed.
+- All three tanks accept base-game generic SEEDS before any custom-seed compatibility is considered.\n- All three tanks accept the same crop-specific Realistic Seeder seed.
 - No tank silently converts crop-specific seed back to generic `SEEDS`.
 - Drill consumption works from all three tanks.
 - No product visually appears in the wrong compartment.
