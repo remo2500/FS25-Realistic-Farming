@@ -1,6 +1,6 @@
 # Current Project Authority
 
-_Last updated: 2026-09-18_
+_Last updated: 2026-09-20_
 
 This file is the governing coordination document for the FS25 Realistic Farming project.
 
@@ -263,7 +263,7 @@ Static PASS does **not** prove visual linkage/hoses/collision behavior, fill-tri
 
 ### Current candidate
 
-**3-Tank RS V3R1 Recovery — TEST READY / runtime validation pending**
+**3-Tank RS V3R2 Seed Fix — TEST READY / runtime validation pending**
 
 Candidate SHA-256:
 
@@ -317,7 +317,7 @@ Do not alter the Seed Hawk V3 candidate before runtime testing without a specifi
 
 ### Static validation
 
-V3R1 passes the original **16/16** Seed Hawk V3 validator checks plus five recovery-specific checks for script registration, recovery identity, three-volume mapping, No Conveyor coverage, and required I3D nodes: **21/21 PASS**.
+V3R2 passes **26/26 seed-fix checks**, including explicit base fill-type authority, rejection of the V3R1 category regression, robust list/set compatibility handling, script registration, independent volume mapping, No Conveyor coverage, required I3D nodes, and unchanged unrelated donor assets.
 
 Required runtime coverage additionally includes the No Conveyor store configuration and major cart/drill attachment arrangements.
 
