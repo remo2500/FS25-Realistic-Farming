@@ -426,14 +426,19 @@ def validate_bourgault(zf: zipfile.ZipFile, *, v7: bool) -> list[Check]:
     return checks
 
 
-def validate_seedhawk(zf: zipfile.ZipFile) -> list[Check]:
+def validate_seedhawk(zf: zipfile.ZipFile, *, v3r2: bool = False) -> list[Check]:
     checks: list[Check] = []
     vehicle_path = "seedHawk660AirCart.xml"
+    i3d_path = "seedHawk660AirCart.i3d"
     script_path = "scripts/ThreeTankCompat.lua"
 
-    for path in (vehicle_path, script_path):
+    required_paths = (vehicle_path, script_path)
+    if v3r2:
+        required_paths = (vehicle_path, i3d_path, script_path)
+
+    for path in required_paths:
         checks.append(Check(f"required file {path}", path in zf.namelist()))
-    if not all(c.ok for c in checks[-2:]):
+    if not all(c.ok for c in checks[-len(required_paths):]):
         return checks
 
     vehicle = xml_from_zip(zf, vehicle_path)
@@ -442,8 +447,23 @@ def validate_seedhawk(zf: zipfile.ZipFile) -> list[Check]:
     checks.append(Check("three fill units", len(units) == 3, f"found {len(units)}"))
     checks.append(Check("capacity authority", caps == [5600, 5600, 10600], f"found {caps}"))
     checks.append(Check("capacity total 21800 L", sum(caps) == 21800, f"found {sum(caps)}"))
-    categories = [u.attrib.get("fillTypeCategories") for u in units]
-    checks.append(Check("all tanks use seeds fertilizer categories", categories == ["seeds fertilizer"] * 3, str(categories)))
+
+    if v3r2:
+        fill_types = [u.attrib.get("fillTypes") for u in units]
+        categories = [u.attrib.get("fillTypeCategories") for u in units]
+        checks.append(Check(
+            "V3R2 explicit base SEEDS/FERTILIZER authority",
+            fill_types == ["seeds fertilizer"] * 3,
+            str(fill_types),
+        ))
+        checks.append(Check(
+            "V3R2 rejects invalid seeds/fertilizer category regression",
+            categories == [None, None, None],
+            str(categories),
+        ))
+    else:
+        categories = [u.attrib.get("fillTypeCategories") for u in units]
+        checks.append(Check("all tanks use seeds fertilizer categories", categories == ["seeds fertilizer"] * 3, str(categories)))
 
     roots = []
     for unit in units:
@@ -464,15 +484,24 @@ def validate_seedhawk(zf: zipfile.ZipFile) -> list[Check]:
 
     configurations = vehicle.findall("./cover/coverConfigurations/coverConfiguration")
     conveyor = None
+    no_conveyor_all_three = False
     for configuration in configurations:
         candidate = configuration.findall("cover")
         if len(candidate) == 3:
-            conveyor = candidate
-            break
+            stops = [cover.attrib.get("openAnimationStopTime") for cover in candidate]
+            if stops == ["0", "0.234", "0.534"]:
+                conveyor = candidate
+        for cover in candidate:
+            if (
+                cover.attrib.get("openAnimation") == "loadingPipeNew"
+                and cover.attrib.get("fillUnitIndices") == "1 2 3"
+            ):
+                no_conveyor_all_three = True
+
     if conveyor is None:
         checks.append(Check("three-state conveyor cover configuration", False, "not found"))
     else:
-        stops = [c.attrib.get("openAnimationStopTime") for c in conveyor]
+        stops = [cover.attrib.get("openAnimationStopTime") for cover in conveyor]
         checks.append(Check("three-state conveyor cover configuration", stops == ["0", "0.234", "0.534"], str(stops)))
         last = conveyor[-1]
         checks.append(Check(
@@ -488,6 +517,61 @@ def validate_seedhawk(zf: zipfile.ZipFile) -> list[Check]:
         "custom seed fallback uses SEED suffix rather than broad substring",
         'string.sub(upperName, -4) == "SEED"' in script and 'string.find(string.upper(tostring(name)), "SEED"' not in script,
     ))
+
+    if v3r2:
+        volumes = vehicle.findall("./fillVolume/fillVolumeConfigurations/fillVolumeConfiguration/volumes/volume")
+        mapping = [(v.attrib.get("node"), v.attrib.get("fillUnitIndex")) for v in volumes]
+        required_mapping = {
+            ("fillSeed", "1"),
+            ("fillSeedMiddle", "2"),
+            ("fillFert", "3"),
+        }
+        checks.append(Check(
+            "three independent physical fill volumes",
+            required_mapping.issubset(set(mapping)),
+            str(mapping),
+        ))
+        checks.append(Check("No Conveyor configuration targets all three tanks", no_conveyor_all_three))
+
+        mod_desc = text_from_zip(zf, "modDesc.xml")
+        checks.append(Check(
+            "V3R2 compatibility script registered",
+            '<sourceFile filename="scripts/ThreeTankCompat.lua" />' in mod_desc,
+        ))
+        checks.append(Check(
+            "V3R2 distinct version/title",
+            "<version>1.0.1.1</version>" in mod_desc and "3-Tank RS V3R2 Seed Fix" in mod_desc,
+        ))
+
+        checks.append(Check(
+            "V3R2 handles GIANTS list and set fill-type tables",
+            'type(value) == "number"' in script and 'value == true and type(key) == "number"' in script,
+        ))
+        checks.append(Check(
+            "V3R2 directly resolves generic base fill types",
+            'getFillTypesByNames("seeds fertilizer")' in script,
+        ))
+        checks.append(Check(
+            "V3R2 rejects invalid seeds fertilizer category lookup",
+            'getFillTypesByCategoryNames("seeds fertilizer")' not in script,
+        ))
+        checks.append(Check(
+            "V3R2 keeps fertilizer category extension supplemental",
+            'getFillTypesByCategoryNames("fertilizer")' in script,
+        ))
+
+        i3d = text_from_zip(zf, i3d_path)
+        required_nodes = [
+            "fillSeed",
+            "fillSeedMiddle",
+            "fillFert",
+            "exactFillRootNodeSeeds",
+            "exactFillRootNodeSeedsMiddle",
+            "exactFillRootNodeFertilizer",
+        ]
+        missing = [name for name in required_nodes if f'name="{name}"' not in i3d]
+        checks.append(Check("required Seed Hawk I3D nodes present", not missing, f"missing {missing}"))
+
     return checks
 
 
@@ -496,7 +580,7 @@ def main() -> int:
     parser.add_argument("zipfile", help="candidate FS25 mod ZIP")
     parser.add_argument(
         "--profile",
-        choices=["bourgault7950-v6", "bourgault7950-v7", "seedhawk660-v3"],
+        choices=["bourgault7950-v6", "bourgault7950-v7", "seedhawk660-v3", "seedhawk660-v3r2"],
         required=True,
     )
     args = parser.parse_args()
